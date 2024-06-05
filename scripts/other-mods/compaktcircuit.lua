@@ -65,19 +65,18 @@ end
 --------------------------------------------------------------------------------
 
 local function ccs_init()
-    if remote.interfaces['compaktcircuit'] and remote.interfaces['compaktcircuit']['add_combinator'] then
-        remote.add_interface(const.filter_combinator_name, {
-            get_info = ccs_get_info,
-            create_packed_entity = ccs_create_packed_entity,
-            create_entity = ccs_create_entity,
-        })
+    if not Framework.remote_api then return end
+    if not (remote.interfaces['compaktcircuit'] and remote.interfaces['compaktcircuit']['add_combinator']) then return end
 
-        remote.call('compaktcircuit', 'add_combinator', {
-            name = const.filter_combinator_name,
-            packed_names = { const.filter_combinator_name_packed },
-            interface_name = const.filter_combinator_name,
-        })
-    end
+    Framework.remote_api.get_info = ccs_get_info
+    Framework.remote_api.create_packed_entity = ccs_create_packed_entity
+    Framework.remote_api.create_entity = ccs_create_entity
+
+    remote.call('compaktcircuit', 'add_combinator', {
+        name = const.filter_combinator_name,
+        packed_names = { const.filter_combinator_name_packed },
+        interface_name = const.filter_combinator_name,
+    })
 end
 
 --------------------------------------------------------------------------------

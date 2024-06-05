@@ -22,6 +22,7 @@ local Is = require('__stdlib__/stdlib/utils/is')
 --- @field logger FrameworkLogger?
 --- @field runtime FrameworkRuntime?
 --- @field gui_manager FrameworkGuiManager?
+--- @field remote_api table<string, function>?
 Framework = {
     --- The non-localised prefix (textual ID) of this mod.
     -- Must be set as the earliest possible time, as virtually all other framework parts use this.
@@ -47,6 +48,8 @@ Framework = {
     runtime = nil,
 
     gui_manager = nil,
+
+    remote_api = nil,
 }
 
 --- Initialize the core framework.
@@ -77,6 +80,11 @@ function Framework:init(config)
         self.logger:init()
 
         self.gui_manager = require('framework.gui_manager')
+
+        if config.remote_name then
+            self.remote_api = {}
+            remote.add_interface(config.remote_name, self.remote_api)
+        end
     elseif (settings) then
         -- prototype stage
         require('framework.prototype')
@@ -94,3 +102,4 @@ return Framework
 --- @field prefix string A prefix for all game registered elements
 --- @field root string The module root name
 --- @field log_tag string? A custom logger tag
+--- @field remote_name string? The name for the remote interface. If defined, the mod will have a remote interface.

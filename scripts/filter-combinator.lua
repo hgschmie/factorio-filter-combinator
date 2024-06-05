@@ -43,7 +43,7 @@ local function create_config(parent_config)
 end
 
 ------------------------------------------------------------------------
--- init setup 
+-- init setup
 ------------------------------------------------------------------------
 
 --- Setup the global fico data structure.
@@ -586,7 +586,7 @@ function FiCo:destroy(entity_id)
 end
 
 ------------------------------------------------------------------------
--- ticker code, updates the status 
+-- ticker code, updates the status
 ------------------------------------------------------------------------
 
 --- Can be called from a ticker to update e.g. power status. Useful in

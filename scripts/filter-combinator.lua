@@ -105,62 +105,6 @@ function FiCo:setEntity(entity_id, fc_entity)
 end
 
 ------------------------------------------------------------------------
--- create internal entities
-------------------------------------------------------------------------
-
----@class FcCreateInternalEntityCfg
----@field entity FilterCombinatorData
----@field type string
----@field ignore boolean?
----@field player_index integer?
----@field x integer?
----@field y integer?
-
----@param cfg FcCreateInternalEntityCfg
-local function create_internal_entity(cfg)
-    local fc_entity = cfg.entity
-    local type = cfg.type
-
-    local ignore = cfg.ignore or false
-    local player_index = cfg.player_index
-
-    -- ignored combinators are always invisible
-    -- if no player index was passed, combinators are invisible
-    local comb_visible = (not ignore) and (player_index and Framework.settings:player(player_index).comb_visible)
-
-    -- invisible combinators share position with the main unit
-    local x = (comb_visible and cfg.x or 0) or 0
-    local y = (comb_visible and cfg.y or 0) or 0
-
-    local entity_map = const.entity_maps[comb_visible and 'debug' or 'standard']
-
-    local main = fc_entity.main
-
-    ---@type LuaEntity?
-    local sub_entity = main.surface.create_entity {
-        name = entity_map[type],
-        position = { x = main.position.x + x, y = main.position.y + y },
-        direction = main.direction,
-        force = main.force,
-
-        create_build_effect_smoke = false,
-        spawn_decorations = false,
-        move_stuck_players = true,
-    }
-
-    assert(sub_entity)
-
-    sub_entity.minable = false
-    sub_entity.destructible = false
-
-    if not ignore then
-        fc_entity.entities[sub_entity.unit_number] = sub_entity
-    end
-
-    return sub_entity
-end
-
-------------------------------------------------------------------------
 -- "all signals" management
 ------------------------------------------------------------------------
 
@@ -510,6 +454,59 @@ function FiCo:reconfigure(fc_entity)
     for _, cfg in pairs(rewire_cfg) do
         connect_wire(fc_entity, cfg, wire_type)
     end
+end
+
+------------------------------------------------------------------------
+-- create internal entities
+------------------------------------------------------------------------
+
+---@class FcCreateInternalEntityCfg
+---@field entity FilterCombinatorData
+---@field type string
+---@field ignore boolean?
+---@field player_index integer?
+---@field x integer?
+---@field y integer?
+
+---@param cfg FcCreateInternalEntityCfg
+local function create_internal_entity(cfg)
+    local fc_entity = cfg.entity
+    local type = cfg.type
+
+    local player_index = cfg.player_index
+
+    -- ignored combinators are always invisible
+    -- if no player index was passed, combinators are invisible
+    local comb_visible = player_index and Framework.settings:player(player_index).comb_visible
+
+    -- invisible combinators share position with the main unit
+    local x = (comb_visible and cfg.x or 0) or 0
+    local y = (comb_visible and cfg.y or 0) or 0
+
+    local entity_map = const.entity_maps[comb_visible and 'debug' or 'standard']
+
+    local main = fc_entity.main
+
+    ---@type LuaEntity?
+    local sub_entity = main.surface.create_entity {
+        name = entity_map[type],
+        position = { x = main.position.x + x, y = main.position.y + y },
+        direction = main.direction,
+        force = main.force,
+
+        create_build_effect_smoke = false,
+        spawn_decorations = false,
+        move_stuck_players = true,
+    }
+
+    assert(sub_entity)
+
+    sub_entity.minable = false
+    sub_entity.destructible = false
+
+    fc_entity.entities[sub_entity.unit_number] = sub_entity
+
+    return sub_entity
 end
 
 ------------------------------------------------------------------------

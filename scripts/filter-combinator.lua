@@ -36,7 +36,11 @@ local function create_config(parent_config)
     local config = {}
     -- iterate over all field names given in the default_config
     for field_name, _ in pairs(default_config) do
-        config[field_name] = parent_config[field_name] or default_config[field_name]
+        if parent_config[field_name] ~= nil then
+            config[field_name] = parent_config[field_name]
+        else
+            config[field_name] = default_config[field_name]
+        end
     end
 
     return config

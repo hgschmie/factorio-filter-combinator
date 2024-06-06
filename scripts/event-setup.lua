@@ -138,21 +138,6 @@ local function onEntitySettingsPasted(event)
     This.fico:reconfigure(dst_fc_entity)
 end
 
--- migration from sil3ntstorm filter combinator
--- This requires a patched version of the sil-filter-combinator and does not work with the vanilla version from
--- the mod portal. This code will disappear soon.
-local function onSilEntitySettingsPasted(event)
-
-    if remote.interfaces['sil-filter-combinator'] and remote.interfaces['sil-filter-combinator']['get_config'] then
-        local config = remote.call('sil-filter-combinator', 'get_config', event.source.unit_number)
-        if not config then return end
-
-        local dst_fc_entity = This.fico:entity(event.destination.unit_number) --[[@as FilterCombinatorData]]
-        dst_fc_entity.config = table.deepcopy(config)
-        This.fico:reconfigure(dst_fc_entity)
-    end
-end
-
 --------------------------------------------------------------------------------
 -- Blueprint / copy&paste management
 --------------------------------------------------------------------------------
@@ -293,14 +278,6 @@ Event.register(defines.events.on_entity_cloned, onInternalEntityCloned, match_in
 
 -- Entity settings pasting
 Event.register(defines.events.on_entity_settings_pasted, onEntitySettingsPasted, match_main_entities)
-
--- support migration from sil3ntstorm filter combinator
-Event.register(defines.events.on_entity_settings_pasted, onSilEntitySettingsPasted, function(event)
-    return event.source and event.source.name == 'sil-filter-combinator'
-        and event.destination and event.destination.name == const.filter_combinator_name
-end)
-
-
 
 -- Blueprint / copy&paste management
 Event.register(defines.events.on_player_setup_blueprint, onPlayerSetupBlueprint)

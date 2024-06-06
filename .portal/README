@@ -1,0 +1,12 @@
+This is a re-imagined version of the [Filter combinator by Sil3ntStorm](https://mods.factorio.com/mod/silent-filter-combinator)
+
+Supports
+
+- Inclusion/Exclusion mode. In inclusion mode, only listed signals are
+  passing through the combinator. In exclusion mode, the listed
+  signals are removed and all other signals pass through.
+
+- Wire filter mode. Take the signals to be included/excluded from an
+  input wire and not from the static filter configuration
+
+- CompactCircuit, Picker Dollies, Nullius. Compatible with Space Exploration.

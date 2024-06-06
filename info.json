@@ -2,6 +2,7 @@
   "name": "filter-combinator-improved",
   "version": "2.0.0",
   "title": "Filter Combinator (Reimagined)",
+  "description": "A combinator that allows the filtering of values. Reimagined version of the original filter combinator by Sil3ntSt0rm.",
   "author": "hgschmie",
   "contact": "https://github.com/hgschmie/factorio-filter-combinator/issues/",
   "homepage": "https://github.com/hgschmie/factorio-filter-combinator",
@@ -14,5 +15,10 @@
     "?compaktcircuit",
     "?space-exploration"
   ],
-  "description": "A combinator that allows the filtering of values. Reimagined version of the original filter combinator."
+  "package": {
+    "git_publish_branch": "main",
+    "readme": ".portal/README",
+    "gallery": [ ".portal/gallery_1.png",".portal/gallery_2.png",".portal/gallery_3.png" ],
+    "sync_portal_details": true
+  }
 }

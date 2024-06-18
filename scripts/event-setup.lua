@@ -226,10 +226,9 @@ local function onConfigurationChanged(changed)
     if This and This.fico then
         This.fico:clearAllSignals()
 
-        local all_signals = This.fico:getAllSignals()
-
         for _, fc_entity in pairs(This.fico:entities()) do
-            fc_entity.ref.ex.get_or_create_control_behavior().parameters = all_signals
+            local ex_control_behavior = fc_entity.ref.ex.get_or_create_control_behavior() --[[@as LuaConstantCombinatorControlBehavior]]
+            ex_control_behavior.parameters = This.fico:getAllSignals(ex_control_behavior.signals_count)
         end
     end
 end

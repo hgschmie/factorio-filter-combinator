@@ -134,15 +134,27 @@ local function create_all_signals()
     return signals
 end
 
+local raise_warning = false
+local raise_warning_tick = 0
+local min_ex_parameters = 2e20
+
+---@param max_signal_count integer? maximum numbers of signals returned
 ---@return ConstantCombinatorParameters[] all_signals
-function FiCo:getAllSignals()
+function FiCo:getAllSignals(max_signal_count)
     if not self.all_signals then
         if not global.all_signals then
             global.all_signals = create_all_signals()
         end
         self.all_signals = global.all_signals
     end
-    return self.all_signals
+
+    if max_signal_count and #self.all_signals > max_signal_count then
+        raise_warning = true
+        min_ex_parameters = math.min(min_ex_parameters, max_signal_count)
+        return table.slice(self.all_signals, 1, max_signal_count)
+    else
+        return self.all_signals
+    end
 end
 
 function FiCo:clearAllSignals()
@@ -546,7 +558,8 @@ function FiCo:create(main, player_index, tags)
         }
     end
 
-    fc_entity.ref.ex.get_or_create_control_behavior().parameters = self:getAllSignals()
+    local ex_control_behavior = fc_entity.ref.ex.get_or_create_control_behavior() --[[@as LuaConstantCombinatorControlBehavior]]
+    ex_control_behavior.parameters = self:getAllSignals(ex_control_behavior.signals_count)
 
     -- setup all the sub-entities
     for _, behavior in pairs(initial_behavior) do
@@ -594,6 +607,20 @@ end
 --- the GUI.
 ---@param fc_entity FilterCombinatorData
 function FiCo:tick(fc_entity)
+    if raise_warning and game.tick > raise_warning_tick then
+        raise_warning = false
+        raise_warning_tick = game.tick + 3600 -- raise every minute
+
+        local all_signals = self:getAllSignals()
+        Framework.logger:debugf('All-signals list size exceeds the maximum number of supported signals: %d vs. %d', #all_signals, min_ex_parameters)
+
+        if Framework.settings:runtime().debug_mode then
+            for _, player in pairs(game.players) do
+                player.print(('[Filter Combinator Reimagined] All-signals list size exceeds the maximum number of supported signals: %d vs. %d'):format(#all_signals, min_ex_parameters))
+            end
+        end
+    end
+
     if not fc_entity then return end
 
     -- update status based on the main entity

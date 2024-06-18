@@ -4,3 +4,9 @@ Date: 2024-06-04
 
   Features:
     - First release
+---------------------------------------------------------------------------------------------------
+Version: 2.0.1
+Date: 2024-06-17
+
+  Bugfixes:
+    - bad graphics reference in "normal" resolution mode

@@ -1,6 +1,6 @@
 {
   "name": "filter-combinator-improved",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "title": "Filter Combinator (Reimagined)",
   "description": "A combinator that allows the filtering of values. Reimagined version of the original filter combinator by Sil3ntSt0rm.",
   "author": "hgschmie",

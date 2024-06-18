@@ -241,8 +241,7 @@ local sub_entities = {
 
     { id = 'd2',        type = 'dc', x = 2,  y = -2 },
     { id = 'd3',        type = 'dc', x = 4,  y = -2 },
-    { id = 'd4',        type = 'dc', x = 4,  y =  0 },
-
+    { id = 'd4',        type = 'dc', x = 4,  y = 0 },
 }
 
 local signal_each = { type = 'virtual', name = 'signal-each' }

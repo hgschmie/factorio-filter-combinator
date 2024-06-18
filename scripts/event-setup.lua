@@ -43,7 +43,7 @@ end
 -- entity create / delete
 --------------------------------------------------------------------------------
 
---- @param event EventData.on_built_entity | EventData.on_robot_built_entity | EventData.script_raised_revive
+--- @param event EventData.on_built_entity | EventData.on_robot_built_entity | EventData.script_raised_revive | EventData.script_raised_built
 local function onEntityCreated(event)
     local entity = event and (event.created_entity or event.entity)
 

@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.1.0
-Date: ????
+Date: 2024-06-18
   Bugfixes:
     - fix Index out of bounds error with changing numbers of signals.
     - ensure that crafting is enabled if circuit-network was already researched when the mod is added.

@@ -8,7 +8,7 @@ local Util = require('framework.util')
 
 local const = require('lib.constants')
 
---- @class FilterCombinator
+---@class FilterCombinator
 local FiCo = {}
 
 ------------------------------------------------------------------------
@@ -28,8 +28,8 @@ local default_config = {
     signals = {}
 }
 
---- @param parent_config FilterCombinatorConfig?
---- @return FilterCombinatorConfig config
+---@param parent_config FilterCombinatorConfig?
+---@return FilterCombinatorConfig config
 local function create_config(parent_config)
     parent_config = parent_config or default_config
 
@@ -66,26 +66,26 @@ end
 ------------------------------------------------------------------------
 
 --- Returns the registered total count
---- @return integer count The total count of filter combinators
+---@return integer count The total count of filter combinators
 function FiCo:totalCount()
     return global.fc_data.count
 end
 
 --- Returns data for all filter combinators.
---- @return FilterCombinatorData[] entities
+---@return FilterCombinatorData[] entities
 function FiCo:entities()
     return global.fc_data.fc
 end
 
 --- Returns data for a given filter combinator
---- @param entity_id integer main unit number (== entity id)
---- @return FilterCombinatorData? entity
+---@param entity_id integer main unit number (== entity id)
+---@return FilterCombinatorData? entity
 function FiCo:entity(entity_id)
     return global.fc_data.fc[entity_id]
 end
 
 --- Sets or clears a filter combinator entity
---- @param entity_id integer The unit_number of the primary
+---@param entity_id integer The unit_number of the primary
 ---@param fc_entity FilterCombinatorData?
 function FiCo:setEntity(entity_id, fc_entity)
     assert((fc_entity ~= nil and global.fc_data.fc[entity_id] == nil)
@@ -109,7 +109,7 @@ end
 ------------------------------------------------------------------------
 
 --- Adds all item, fluid and virtual signals to a combinator.
---- @return ConstantCombinatorParameters[] all_signals
+---@return ConstantCombinatorParameters[] all_signals
 local function create_all_signals()
     local prototypes = {
         item = game.item_prototypes,
@@ -515,9 +515,9 @@ end
 
 --- Creates a new entity from the main entity, registers with the mod
 --- and configures it.
---- @param main LuaEntity
---- @param player_index integer?
---- @param tags Tags?
+---@param main LuaEntity
+---@param player_index integer?
+---@param tags Tags?
 function FiCo:create(main, player_index, tags)
     if not Is.Valid(main) then return end
 
@@ -572,7 +572,7 @@ function FiCo:create(main, player_index, tags)
 end
 
 --- Destroys a FC and all its sub-entities
---- @param entity_id integer main unit number (== entity id)
+---@param entity_id integer main unit number (== entity id)
 function FiCo:destroy(entity_id)
     assert(Is.Number(entity_id))
 
@@ -632,8 +632,8 @@ end
 
 return FiCo
 
---- @class FilterCombinatorData
---- @field main LuaEntity
---- @field config FilterCombinatorConfig
---- @field entities LuaEntity[]
---- @field ref table<string, LuaEntity>
+---@class FilterCombinatorData
+---@field main LuaEntity
+---@field config FilterCombinatorConfig
+---@field entities LuaEntity[]
+---@field ref table<string, LuaEntity>

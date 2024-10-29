@@ -1,3 +1,4 @@
+---@meta
 ------------------------------------------------------------------------
 -- Framework initialization code
 --
@@ -10,8 +11,9 @@ local Is = require('__stdlib__/stdlib/utils/is')
 ----------------------------------------------------------------------------------------------------
 
 --- Framework central access point
--- The framework singleton, provides access to well known constants and the Framework components
--- other components.
+--- The framework singleton, provides access to well known constants and the Framework components
+--- other components.
+---
 ---@class FrameworkRoot
 ---@field PREFIX string
 ---@field NAME string
@@ -101,10 +103,3 @@ end
 ---------------------------------------------------------------------------------------------------
 
 return Framework
-
---- @class FrameworkConfig
---- @field name string The human readable name for the module
---- @field prefix string A prefix for all game registered elements
---- @field root string The module root name
---- @field log_tag string? A custom logger tag
---- @field remote_name string? The name for the remote interface. If defined, the mod will have a remote interface.

@@ -1,3 +1,4 @@
+---@meta
 --------------------------------------------------------------------------------
 -- Utility functions
 --------------------------------------------------------------------------------
@@ -5,10 +6,10 @@
 local Is = require('__stdlib__/stdlib/utils/is')
 
 ---@class FrameworkUtil
---- @field STATUS_TABLE table<defines.entity_status, string>
---- @field STATUS_SPRITES table<defines.entity_status, string>
---- @field STATUS_NAMES table<defines.entity_status, string>
---- @field STATUS_LEDS table<string, string>
+---@field STATUS_TABLE table<defines.entity_status, string>
+---@field STATUS_SPRITES table<defines.entity_status, string>
+---@field STATUS_NAMES table<defines.entity_status, string>
+---@field STATUS_LEDS table<string, string>
 local Util = {
     STATUS_LEDS = {},
     STATUS_TABLE = {},
@@ -66,7 +67,7 @@ local function create_matcher(values, entity_matcher)
             return matcher_map[entity_matcher(event.source, pattern)] and matcher_map[entity_matcher(event.destination, pattern)]
         end
 
-        return matcher_map[entity_matcher(event.created_entity or event.entity, pattern)]
+        return matcher_map[entity_matcher(event.entity, pattern)]
     end
 end
 

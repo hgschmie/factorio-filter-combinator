@@ -13,7 +13,7 @@ local Constants = {}
 -- the current version that is the result of the latest migration
 Constants.current_version = 8
 
-Constants.prefix = 'hps:fc-'
+Constants.prefix = 'hps__fc-'
 Constants.name = 'filter-combinator'
 Constants.root = '__filter-combinator-improved__'
 Constants.gfx_location = Constants.root .. '/graphics/'

@@ -52,9 +52,9 @@ end
 
 --- Setup the global fico data structure.
 function FiCo:init()
-    if global.fc_data then return end
+    if storage.fc_data then return end
 
-    global.fc_data = {
+    storage.fc_data = {
         fc = {},
         count = 0,
         VERSION = const.current_version,
@@ -68,39 +68,39 @@ end
 --- Returns the registered total count
 ---@return integer count The total count of filter combinators
 function FiCo:totalCount()
-    return global.fc_data.count
+    return storage.fc_data.count
 end
 
 --- Returns data for all filter combinators.
 ---@return FilterCombinatorData[] entities
 function FiCo:entities()
-    return global.fc_data.fc
+    return storage.fc_data.fc
 end
 
 --- Returns data for a given filter combinator
 ---@param entity_id integer main unit number (== entity id)
 ---@return FilterCombinatorData? entity
 function FiCo:entity(entity_id)
-    return global.fc_data.fc[entity_id]
+    return storage.fc_data.fc[entity_id]
 end
 
 --- Sets or clears a filter combinator entity
 ---@param entity_id integer The unit_number of the primary
 ---@param fc_entity FilterCombinatorData?
 function FiCo:setEntity(entity_id, fc_entity)
-    assert((fc_entity ~= nil and global.fc_data.fc[entity_id] == nil)
-        or (fc_entity == nil and global.fc_data.fc[entity_id] ~= nil))
+    assert((fc_entity ~= nil and storage.fc_data.fc[entity_id] == nil)
+        or (fc_entity == nil and storage.fc_data.fc[entity_id] ~= nil))
 
     if (fc_entity) then
         assert(Is.Valid(fc_entity.main) and fc_entity.main.unit_number == entity_id)
     end
 
-    global.fc_data.fc[entity_id] = fc_entity
-    global.fc_data.count = global.fc_data.count + ((fc_entity and 1) or -1)
+    storage.fc_data.fc[entity_id] = fc_entity
+    storage.fc_data.count = storage.fc_data.count + ((fc_entity and 1) or -1)
 
-    if global.fc_data.count < 0 then
-        global.fc_data.count = table_size(global.fc_data.fc)
-        Framework.logger:logf('Filter Combinator count got negative (bug), size is now: %d', global.fc_data.count)
+    if storage.fc_data.count < 0 then
+        storage.fc_data.count = table_size(storage.fc_data.fc)
+        Framework.logger:logf('Filter Combinator count got negative (bug), size is now: %d', storage.fc_data.count)
     end
 end
 
@@ -142,10 +142,10 @@ local min_ex_parameters = 2e20
 ---@return ConstantCombinatorParameters[] all_signals
 function FiCo:getAllSignals(max_signal_count)
     if not self.all_signals then
-        if not global.all_signals then
-            global.all_signals = create_all_signals()
+        if not storage.all_signals then
+            storage.all_signals = create_all_signals()
         end
-        self.all_signals = global.all_signals
+        self.all_signals = storage.all_signals
     end
 
     if max_signal_count and #self.all_signals > max_signal_count then
@@ -159,7 +159,7 @@ end
 
 function FiCo:clearAllSignals()
     self.all_signals = nil
-    global.all_signals = nil
+    storage.all_signals = nil
 end
 
 ------------------------------------------------------------------------

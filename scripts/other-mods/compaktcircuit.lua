@@ -34,7 +34,7 @@ local function ccs_create_packed_entity(info, surface, position, force)
     }
 
     assert(packed_main)
-    script.register_on_entity_destroyed(packed_main)
+    script.register_on_object_destroyed(packed_main)
 
     local fc_entity = This.fico:create(packed_main, nil, info)
     assert(fc_entity)
@@ -54,7 +54,7 @@ local function ccs_create_entity(info, surface, force)
     }
 
     assert(main)
-    script.register_on_entity_destroyed(main)
+    script.register_on_object_destroyed(main)
 
     local fc_entity = This.fico:create(main, nil, info)
     assert(fc_entity)
@@ -88,22 +88,22 @@ CompaktCircuitSupport.data = function()
     packed.name = const.filter_combinator_name_packed
 
     -- ArithmeticCombinatorPrototype
-    packed.plus_symbol_sprites = util.empty_sprite(1)
-    packed.minus_symbol_sprites = util.empty_sprite(1)
-    packed.multiply_symbol_sprites = util.empty_sprite(1)
-    packed.divide_symbol_sprites = util.empty_sprite(1)
-    packed.modulo_symbol_sprites = util.empty_sprite(1)
-    packed.power_symbol_sprites = util.empty_sprite(1)
-    packed.left_shift_symbol_sprites = util.empty_sprite(1)
-    packed.right_shift_symbol_sprites = util.empty_sprite(1)
-    packed.and_symbol_sprites = util.empty_sprite(1)
-    packed.or_symbol_sprites = util.empty_sprite(1)
-    packed.xor_symbol_sprites = util.empty_sprite(1)
+    packed.plus_symbol_sprites = util.empty_sprite()
+    packed.minus_symbol_sprites = util.empty_sprite()
+    packed.multiply_symbol_sprites = util.empty_sprite()
+    packed.divide_symbol_sprites = util.empty_sprite()
+    packed.modulo_symbol_sprites = util.empty_sprite()
+    packed.power_symbol_sprites = util.empty_sprite()
+    packed.left_shift_symbol_sprites = util.empty_sprite()
+    packed.right_shift_symbol_sprites = util.empty_sprite()
+    packed.and_symbol_sprites = util.empty_sprite()
+    packed.or_symbol_sprites = util.empty_sprite()
+    packed.xor_symbol_sprites = util.empty_sprite()
 
     -- CombinatorPrototype
-    packed.sprites = util.empty_sprite(1)
+    packed.sprites = util.empty_sprite()
     packed.activity_led_light_offsets = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }
-    packed.activity_led_sprites = util.empty_sprite(1)
+    packed.activity_led_sprites = util.empty_sprite()
     packed.draw_circuit_wires = false
 
     -- turn off the flashing icons

@@ -14,11 +14,9 @@ local fc = table.deepcopy(data.raw['arithmetic-combinator']['arithmetic-combinat
 
 local sprite_h = table.deepcopy(fc.and_symbol_sprites.north)
 update_sprite(sprite_h, 'filter-combinator-improved-display')
-update_sprite(sprite_h.hr_version, 'hr-filter-combinator-improved-display')
 
 local sprite_v = table.deepcopy(fc.and_symbol_sprites.east)
 update_sprite(sprite_v, 'filter-combinator-improved-display')
-update_sprite(sprite_v.hr_version, 'hr-filter-combinator-improved-display')
 
 local full_sprite = { east = sprite_v, west = sprite_v, north = sprite_h, south = sprite_h }
 

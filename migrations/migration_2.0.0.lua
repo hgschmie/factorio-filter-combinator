@@ -6,9 +6,9 @@ local const = require('lib.constants')
 -- installed, then activate the recipe right away.
 ------------------------------------------------------------------------
 
-if global.fc_data and global.fc_data.VERSION >= const.current_version  then return end
+if storage.fc_data and storage.fc_data.VERSION >= const.current_version  then return end
 
-global.fc_data.VERSION = const.current_version
+storage.fc_data.VERSION = const.current_version
 
 for _, force in pairs(game.forces) do
     if force.technologies['circuit-network'].researched then

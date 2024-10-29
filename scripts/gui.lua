@@ -10,7 +10,7 @@ local Util = require('framework.util')
 
 local const = require('lib.constants')
 
---- @class ModGui
+---@class ModGui
 local ModGui = {}
 
 -- callback predefines
@@ -24,8 +24,8 @@ local gui_updater, update_gui_state
 -- UI definition
 ----------------------------------------------------------------------------------------------------
 
---- @param fc_entity FilterCombinatorData
---- @return FrameworkGuiElemDef ui
+---@param fc_entity FilterCombinatorData
+---@return FrameworkGuiElemDef ui
 local function get_ui(fc_entity)
     return {
         type = 'frame',
@@ -261,7 +261,7 @@ end
 
 --- close the UI (button or shortcut key)
 ---
---- @param event EventData.on_gui_click|EventData.on_gui_opened
+---@param event EventData.on_gui_click|EventData.on_gui_opened
 onWindowClosed = function(event)
     local player, player_data = Player.get(event.player_index)
 
@@ -292,7 +292,7 @@ local values_on_off = table.invert(on_off_values)
 
 --- Enable / Disable switch
 ---
---- @param event EventData.on_gui_switch_state_changed
+---@param event EventData.on_gui_switch_state_changed
 onSwitchEnabled = function(event)
     local fc_entity = locate_config(event)
     if not fc_entity then return end
@@ -311,7 +311,7 @@ local values_incl_excl = table.invert(incl_excl_values)
 
 --- inclusive/exclusive switch
 ---
---- @param event EventData.on_gui_switch_state_changed
+---@param event EventData.on_gui_switch_state_changed
 onSwitchExclusive = function(event)
     local fc_entity = locate_config(event)
     if not fc_entity then return end
@@ -322,7 +322,7 @@ end
 ----------------------------------------------------------------------------------------------------
 
 --- switch green wire
---- @param event EventData.on_gui_checked_state_changed
+---@param event EventData.on_gui_checked_state_changed
 onSwitchGreenWire = function(event)
     local fc_entity = locate_config(event)
     if not fc_entity then return end
@@ -333,7 +333,7 @@ end
 ----------------------------------------------------------------------------------------------------
 
 --- switch red wire
---- @param event EventData.on_gui_checked_state_changed
+---@param event EventData.on_gui_checked_state_changed
 onSwitchRedWire = function(event)
     local fc_entity = locate_config(event)
     if not fc_entity then return end
@@ -343,7 +343,7 @@ end
 
 ----------------------------------------------------------------------------------------------------
 
---- @param event  EventData.on_gui_checked_state_changed
+---@param event  EventData.on_gui_checked_state_changed
 onToggleWireMode = function(event)
     local fc_entity = locate_config(event)
     if not fc_entity then return end
@@ -353,7 +353,7 @@ end
 
 ----------------------------------------------------------------------------------------------------
 
---- @param event EventData.on_gui_elem_changed
+---@param event EventData.on_gui_elem_changed
 onSelectSignal = function(event)
     local fc_entity = locate_config(event)
     if not fc_entity then return end
@@ -474,7 +474,7 @@ end
 -- open gui handler
 ----------------------------------------------------------------------------------------------------
 
---- @param event EventData.on_gui_opened
+---@param event EventData.on_gui_opened
 local function onGuiOpened(event)
     local player, player_data = Player.get(event.player_index)
     if player.opened and player_data.fc_gui and player.opened == player_data.fc_gui.gui.root then
@@ -484,7 +484,7 @@ local function onGuiOpened(event)
     -- close an eventually open gui
     onWindowClosed(event)
 
-    local entity = event and (event.created_entity or event.entity) --[[@as LuaEntity]]
+    local entity = event and event.entity --[[@as LuaEntity]]
     local fc_id = entity.unit_number --[[@as integer]]
     local fc_entity = This.fico:entity(fc_id)
 

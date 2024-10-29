@@ -1,16 +1,17 @@
 {
   "name": "filter-combinator-improved",
-  "version": "2.1.2",
+  "version": "3.0.0",
   "title": "Filter Combinator (Reimagined)",
   "description": "A combinator that allows the filtering of values. Reimagined version of the original filter combinator by Sil3ntSt0rm.",
   "author": "hgschmie",
   "contact": "https://github.com/hgschmie/factorio-filter-combinator/issues/",
   "homepage": "https://github.com/hgschmie/factorio-filter-combinator",
-  "factorio_version": "1.1",
+  "factorio_version": "2.0",
   "dependencies": [
-    "base >= 1.1",
-    "stdlib >= 1.4.0",
+    "base >= 2.0.0",
+    "stdlib >= 2.0.0",
     "?PickerDollies",
+    "?even-pickier-dollies",
     "?nullius",
     "?compaktcircuit",
     "?space-exploration"

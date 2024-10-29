@@ -16,13 +16,13 @@ local const = require('lib.constants')
 --------------------------------------------------------------------------------
 
 local function onGhostEntityCreated(event)
-    local entity = event and (event.created_entity or event.entity)
-    script.register_on_entity_destroyed(entity)
+    local entity = event and event.entity
+    script.register_on_object_destroyed(entity)
 
     -- if an entity ghost was placed, register information to configure
     -- an entity if it is placed over the ghost
     ---@type table<integer, ModGhost>
-    local ghosts = global.ghosts or {}
+    local ghosts = storage.ghosts or {}
 
     ---@class ModGhost
     ---@field position MapPosition
@@ -36,23 +36,23 @@ local function onGhostEntityCreated(event)
         player_index = event.player_index
     }
 
-    global.ghosts = ghosts
+    storage.ghosts = ghosts
 end
 
 --------------------------------------------------------------------------------
 -- entity create / delete
 --------------------------------------------------------------------------------
 
---- @param event EventData.on_built_entity | EventData.on_robot_built_entity | EventData.script_raised_revive | EventData.script_raised_built
+---@param event EventData.on_built_entity | EventData.on_robot_built_entity | EventData.script_raised_revive | EventData.script_raised_built
 local function onEntityCreated(event)
-    local entity = event and (event.created_entity or event.entity)
+    local entity = event and event.entity
 
     local player_index = event.player_index
     local tags = event.tags
 
     -- see if this entity replaces a ghost
-    if global.ghosts then
-        for _, ghost in pairs(global.ghosts) do
+    if storage.ghosts then
+        for _, ghost in pairs(storage.ghosts) do
             if entity.position.x == ghost.position.x
                 and entity.position.y == ghost.position.y
                 and entity.orientation == ghost.orientation then
@@ -70,7 +70,7 @@ local function onEntityCreated(event)
 end
 
 local function onEntityDeleted(event)
-    local entity = event and (event.created_entity or event.entity)
+    local entity = event and event.entity
 
     This.fico:destroy(entity.unit_number)
 end
@@ -81,8 +81,8 @@ end
 
 local function onEntityDestroyed(event)
     -- is it a ghost?
-    if global.ghosts and global.ghosts[event.unit_number] then
-        global.ghosts[event.unit_number] = nil
+    if storage.ghosts and storage.ghosts[event.unit_number] then
+        storage.ghosts[event.unit_number] = nil
         return
     end
 
@@ -98,7 +98,7 @@ end
 -- Entity cloning
 --------------------------------------------------------------------------------
 
---- @param event EventData.on_entity_cloned
+---@param event EventData.on_entity_cloned
 local function onMainEntityCloned(event)
     -- Space Exploration Support
     if not (Is.Valid(event.source) and Is.Valid(event.destination)) then return end
@@ -142,8 +142,8 @@ end
 -- Blueprint / copy&paste management
 --------------------------------------------------------------------------------
 
---- @param blueprint LuaItemStack
---- @param entities LuaEntity[]
+---@param blueprint LuaItemStack
+---@param entities LuaEntity[]
 local function save_to_blueprint(entities, blueprint)
     if not entities or #entities < 1 then return end
     if not (blueprint and blueprint.is_blueprint_setup()) then return end
@@ -182,7 +182,7 @@ local function has_valid_cursor_stack(player)
 end
 
 
---- @param event EventData.on_player_setup_blueprint
+---@param event EventData.on_player_setup_blueprint
 local function onPlayerSetupBlueprint(event)
     if not event.area then return end
 
@@ -205,7 +205,7 @@ local function onPlayerSetupBlueprint(event)
     end
 end
 
---- @param event EventData.on_player_configured_blueprint
+---@param event EventData.on_player_configured_blueprint
 local function onPlayerConfiguredBlueprint(event)
     local player, player_data = Player.get(event.player_index)
 
@@ -221,7 +221,7 @@ end
 -- Configuration changes (runtime and startup)
 --------------------------------------------------------------------------------
 
---- @param changed ConfigurationChangedData?
+---@param changed ConfigurationChangedData?
 local function onConfigurationChanged(changed)
     if This and This.fico then
         This.fico:clearAllSignals()

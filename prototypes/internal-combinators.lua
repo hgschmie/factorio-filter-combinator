@@ -4,6 +4,8 @@
 
 local const = require('lib.constants')
 
+local collision_mask_util = require('collision-mask-util')
+
 local combinator_flags = {
     'placeable-off-grid',
     'not-repairable',
@@ -30,15 +32,15 @@ local function create_combinator(source, name)
     -- CombinatorPrototype
     c.energy_source = { type = 'void' }
     c.active_energy_usage = '0.001W'
-    c.sprites = util.empty_sprite(1)
-    c.activity_led_sprites = util.empty_sprite(1)
+    c.sprites = util.empty_sprite()
+    c.activity_led_sprites = util.empty_sprite()
     c.activity_led_light_offsets = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }
     c.draw_circuit_wires = false
 
     -- EntityPrototype
     c.allow_copy_paste = false
     c.collision_box = nil
-    c.collision_mask = {}
+    c.collision_mask = collision_mask_util.new_mask()
     c.selection_box = nil
     c.flags = combinator_flags
     c.minable = nil
@@ -49,27 +51,27 @@ end
 --------------------------------------------------------------------------------
 
 local dc = create_combinator(data.raw['decider-combinator']['decider-combinator'], const.internal_dc_name) --[[@as data.DeciderCombinatorPrototype ]]
-dc.greater_symbol_sprites = util.empty_sprite(1)
-dc.greater_or_equal_symbol_sprites = util.empty_sprite(1)
-dc.less_symbol_sprites = util.empty_sprite(1)
-dc.equal_symbol_sprites = util.empty_sprite(1)
-dc.not_equal_symbol_sprites = util.empty_sprite(1)
-dc.less_or_equal_symbol_sprites = util.empty_sprite(1)
+dc.greater_symbol_sprites = util.empty_sprite()
+dc.greater_or_equal_symbol_sprites = util.empty_sprite()
+dc.less_symbol_sprites = util.empty_sprite()
+dc.equal_symbol_sprites = util.empty_sprite()
+dc.not_equal_symbol_sprites = util.empty_sprite()
+dc.less_or_equal_symbol_sprites = util.empty_sprite()
 
 --------------------------------------------------------------------------------
 
 local ac = create_combinator(data.raw['arithmetic-combinator']['arithmetic-combinator'], const.internal_ac_name) --[[@as data.ArithmeticCombinatorPrototype ]]
-ac.plus_symbol_sprites = util.empty_sprite(1)
-ac.minus_symbol_sprites = util.empty_sprite(1)
-ac.multiply_symbol_sprites = util.empty_sprite(1)
-ac.divide_symbol_sprites = util.empty_sprite(1)
-ac.modulo_symbol_sprites = util.empty_sprite(1)
-ac.power_symbol_sprites = util.empty_sprite(1)
-ac.left_shift_symbol_sprites = util.empty_sprite(1)
-ac.right_shift_symbol_sprites = util.empty_sprite(1)
-ac.and_symbol_sprites = util.empty_sprite(1)
-ac.or_symbol_sprites = util.empty_sprite(1)
-ac.xor_symbol_sprites = util.empty_sprite(1)
+ac.plus_symbol_sprites = util.empty_sprite()
+ac.minus_symbol_sprites = util.empty_sprite()
+ac.multiply_symbol_sprites = util.empty_sprite()
+ac.divide_symbol_sprites = util.empty_sprite()
+ac.modulo_symbol_sprites = util.empty_sprite()
+ac.power_symbol_sprites = util.empty_sprite()
+ac.left_shift_symbol_sprites = util.empty_sprite()
+ac.right_shift_symbol_sprites = util.empty_sprite()
+ac.and_symbol_sprites = util.empty_sprite()
+ac.or_symbol_sprites = util.empty_sprite()
+ac.xor_symbol_sprites = util.empty_sprite()
 
 --------------------------------------------------------------------------------
 
@@ -79,15 +81,15 @@ local cc = table.deepcopy(data.raw['constant-combinator']['constant-combinator']
 cc.name = const.internal_cc_name
 
 -- ConstantCombinatorPrototype
-cc.sprites = util.empty_sprite(1)
-cc.activity_led_sprites = util.empty_sprite(1)
+cc.sprites = util.empty_sprite()
+cc.activity_led_sprites = util.empty_sprite()
 cc.activity_led_light_offsets = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }
 cc.draw_circuit_wires = false
 
 -- EntityPrototype
 cc.allow_copy_paste = false
 cc.collision_box = nil
-cc.collision_mask = {}
+cc.collision_mask = collision_mask_util.new_mask()
 cc.selection_box = nil
 cc.flags = combinator_flags
 cc.minable = nil
@@ -112,11 +114,8 @@ debug_dc.active_energy_usage = '0.001W'
 local tint = { r = 0, g = 0.8, b = 0.4, a = 1}
 for _, directions in pairs({'north', 'south','east','west'}) do
     debug_ac.sprites[directions].layers[1].tint = tint
-    debug_ac.sprites[directions].layers[1].hr_version.tint = tint
     debug_cc.sprites[directions].layers[1].tint = tint
-    debug_cc.sprites[directions].layers[1].hr_version.tint = tint
     debug_dc.sprites[directions].layers[1].tint = tint
-    debug_dc.sprites[directions].layers[1].hr_version.tint = tint
 end
 
 data:extend { ac, cc, dc, debug_ac, debug_cc, debug_dc }

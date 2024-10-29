@@ -11,9 +11,9 @@ local Is = require('__stdlib__/stdlib/utils/is')
 ----------------------------------------------------------------------------------------------------
 
 --- Framework central access point
---- The framework singleton, provides access to well known constants and the Framework components
---- other components.
----
+-- The framework singleton, provides access to well known constants and the Framework components
+-- other components.
+
 ---@class FrameworkRoot
 ---@field PREFIX string
 ---@field NAME string
@@ -24,6 +24,8 @@ local Is = require('__stdlib__/stdlib/utils/is')
 ---@field logger FrameworkLogger?
 ---@field runtime FrameworkRuntime?
 ---@field gui_manager FrameworkGuiManager?
+---@field ghost_manager FrameworkGhostManager?
+---@field blueprint FrameworkBlueprintManager?
 ---@field remote_api table<string, function>?
 ---@field render FrameworkRender?
 Framework = {
@@ -51,6 +53,10 @@ Framework = {
     runtime = nil,
 
     gui_manager = nil,
+
+    ghost_manager = nil,
+
+    blueprint = nil,
 
     remote_api = nil,
 
@@ -85,6 +91,8 @@ function Framework:init(config)
         self.logger:init()
 
         self.gui_manager = require('framework.gui_manager')
+        self.ghost_manager = require('framework.ghost_manager')
+        self.blueprint = require('framework.blueprint_manager')
 
         self.render = require('framework.render')
 
@@ -92,7 +100,7 @@ function Framework:init(config)
             self.remote_api = {}
             remote.add_interface(config.remote_name, self.remote_api)
         end
-    elseif util then
+    elseif data.raw['gui-style'] then
         -- prototype stage
         require('framework.prototype')
     end

@@ -4,6 +4,23 @@
 ----------------------------------------------------------------------------------------------------
 
 ----------------------------------------------------------------------------------------------------
+--- ghost_manager.lua
+----------------------------------------------------------------------------------------------------
+
+
+---@class FrameworkAttachedEntity
+---@field entity LuaEntity
+---@field name string?
+---@field position MapPosition?
+---@field orientation float?
+---@field tags Tags?
+---@field player_index integer
+---@field tick integer
+
+---@class FrameworkGhostManagerState
+---@field ghost_entities FrameworkAttachedEntity[]
+
+----------------------------------------------------------------------------------------------------
 --- gui_manager.lua
 ----------------------------------------------------------------------------------------------------
 
@@ -55,7 +72,7 @@
 
 ---@class FrameworkSettingDefinition
 ---@field values table<string,(integer|boolean|double|string|Color)?>|table<string, table<string, (integer|boolean|double|string|Color)?>?>?
----@field load_value function(name: string, player_index: integer?): ModSetting?
----@field get_values function(self: FrameworkSettingDefinition, player_index: integer?): table<string, (integer|boolean|double|string|Color)?>
----@field set_values function(self: FrameworkSettingDefinition, values: table<string, (integer|boolean|double|string|Color)?>, player_index: integer?)
----@field clear function(self: FrameworkSettingDefinition, player_index: integer?)
+---@field load_value fun(name: string, player_index: integer?): ModSetting?
+---@field get_values fun(self: FrameworkSettingDefinition, player_index: integer?): table<string, (integer|boolean|double|string|Color)?>
+---@field set_values fun(self: FrameworkSettingDefinition, values: table<string, (integer|boolean|double|string|Color)?>, player_index: integer?)
+---@field clear fun(self: FrameworkSettingDefinition, player_index: integer?)

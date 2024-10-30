@@ -4,6 +4,7 @@
 
 local const = require('lib.constants')
 local Is = require('__stdlib2__/stdlib/utils/is')
+local tools = require('framework.tools')
 
 local CompaktCircuitSupport = {}
 
@@ -30,7 +31,7 @@ local function ccs_create_packed_entity(info, surface, position, force)
         position = position,
         force = force,
         direction = info.direction,
-        raise_built = false
+        raise_built = false,
     }
 
     assert(packed_main)
@@ -82,7 +83,9 @@ end
 --------------------------------------------------------------------------------
 
 function CompaktCircuitSupport.data()
-    local packed =copy(data.raw['arithmetic-combinator'][const.filter_combinator_name])
+    local collision_mask_util = require('collision-mask-util')
+
+    local packed = tools.copy(data.raw['arithmetic-combinator'][const.filter_combinator_name])
 
     -- PrototypeBase
     packed.name = const.filter_combinator_name_packed
@@ -112,7 +115,7 @@ function CompaktCircuitSupport.data()
 
     -- EntityPrototype
     packed.collision_box = nil
-    packed.collision_mask = {}
+    packed.collision_mask = collision_mask_util.new_mask()
     packed.selection_box = nil
     packed.flags = {
         'placeable-off-grid',
@@ -120,16 +123,18 @@ function CompaktCircuitSupport.data()
         'not-on-map',
         'not-deconstructable',
         'not-blueprintable',
-        'hidden',
         'hide-alt-info',
         'not-flammable',
-        'no-copy-paste',
-        'not-selectable-in-game',
         'not-upgradable',
         'not-in-kill-statistics',
         'not-in-made-in'
     }
+
+    packed.allow_copy_paste = false
+    packed.hidden = true
+    packed.hidden_in_factoriopedia = true
     packed.minable = nil
+    packed.selection_box = nil
     packed.selectable_in_game = false
 
     data:extend { packed }

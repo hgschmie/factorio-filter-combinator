@@ -2,23 +2,37 @@
 --- Initialize this mod's globals
 ----------------------------------------------------------------------------------------------------
 
----@class ModThis
----@field other_mods string[]
+---@class FicoModThis
+---@field other_mods table<string, string>
 ---@field fico FilterCombinator
 ---@field gui ModGui?
 local This = {
-    other_mods = { 'nullius', 'framework', 'compaktcircuit', 'PickerDollies' },
+    other_mods = {
+        framework = 'framework',
+        nullius = 'nullius',
+        compaktcircuit = 'compaktcircuit',
+        PickerDollies = 'PickerDollies',
+        ['even-pickier-dollies'] = 'PickerDollies',
+    },
     fico = require('scripts.filter-combinator'),
     gui = nil,
 }
 
+function This:this_runtime()
+    if script then
+        This.gui = This.gui or require('scripts.gui') --[[@as ModGui ]]
+    end
+end
+
 Framework.settings:add_startup(require('scripts.settings-startup'))
 Framework.settings:add_player(require('scripts.settings-player'))
 
-if (script) then
-    This.gui = require('scripts.gui') --[[@as ModGui ]]
-end
-
 ----------------------------------------------------------------------------------------------------
 
-return This
+return function(stage)
+    if This['this_' .. stage] then
+        This['this_' .. stage](This)
+    end
+
+    return This
+end

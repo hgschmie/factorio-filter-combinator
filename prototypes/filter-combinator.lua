@@ -10,13 +10,13 @@ local function update_sprite(sprite, filename, x, y)
     sprite.y = y or 0
 end
 
-local fc = table.deepcopy(data.raw['arithmetic-combinator']['arithmetic-combinator']) --[[@as data.ArithmeticCombinatorPrototype ]]
+local fc = util.copy(data.raw['arithmetic-combinator']['arithmetic-combinator']) --[[@as data.ArithmeticCombinatorPrototype ]]
 
-local sprite_h = table.deepcopy(fc.and_symbol_sprites.north)
-update_sprite(sprite_h, 'filter-combinator-improved-display')
+local sprite_h = util.copy(fc.and_symbol_sprites.north)
+update_sprite(sprite_h, 'hr-filter-combinator-improved-display')
 
-local sprite_v = table.deepcopy(fc.and_symbol_sprites.east)
-update_sprite(sprite_v, 'filter-combinator-improved-display')
+local sprite_v = util.copy(fc.and_symbol_sprites.east)
+update_sprite(sprite_v, 'hr-filter-combinator-improved-display')
 
 local full_sprite = { east = sprite_v, west = sprite_v, north = sprite_h, south = sprite_h }
 
@@ -39,5 +39,7 @@ fc.xor_symbol_sprites = full_sprite
 -- EntityPrototype
 fc.icon = const:png('filter-combinator-improved')
 fc.minable.result = fc.name
+
+-- TODO - deal with factoriopedia
 
 data:extend { fc }

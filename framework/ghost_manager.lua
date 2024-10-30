@@ -6,7 +6,7 @@
 local Event = require('__stdlib__/stdlib/event/event')
 local Is = require('__stdlib__/stdlib/utils/is')
 
-local Util = require('framework.util')
+local tools = require('framework.tools')
 
 ---@class FrameworkGhostManager
 local FrameworkGhostManager = {}
@@ -93,13 +93,13 @@ function FrameworkGhostManager.onEntityDestroyed(event)
 end
 
 function FrameworkGhostManager.register_for_ghost_names(values)
-    local ghost_filter = Util.create_event_ghost_entity_name_matcher(values)
-    Util.event_register(Util.CREATION_EVENTS, Framework.ghost_manager.onGhostEntityCreated, ghost_filter)
+    local ghost_filter = tools.create_event_ghost_entity_name_matcher(values)
+    tools.event_register(tools.CREATION_EVENTS, Framework.ghost_manager.onGhostEntityCreated, ghost_filter)
 end
 
 function FrameworkGhostManager.register_for_ghost_attributes(attribute, values)
-    local ghost_filter = Util.create_event_ghost_entity_matcher(attribute, values)
-    Util.event_register(Util.CREATION_EVENTS, Framework.ghost_manager.onGhostEntityCreated, ghost_filter)
+    local ghost_filter = tools.create_event_ghost_entity_matcher(attribute, values)
+    tools.event_register(tools.CREATION_EVENTS, Framework.ghost_manager.onGhostEntityCreated, ghost_filter)
 end
 
 Event.register(defines.events.on_object_destroyed, FrameworkGhostManager.onEntityDestroyed)

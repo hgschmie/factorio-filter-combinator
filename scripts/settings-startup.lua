@@ -1,9 +1,11 @@
 ------------------------------------------------------------------------
 -- global startup settings
 ------------------------------------------------------------------------
+
+---@type table<string, FrameworkSettingDefault>
 local StartupSettings = {
   -- Defaults
-  empty_slots = { Framework.PREFIX .. "empty-slots", 40 },
+  empty_slots = { name = Framework.PREFIX .. "empty-slots", default_value = 40 },
 }
 
 return StartupSettings

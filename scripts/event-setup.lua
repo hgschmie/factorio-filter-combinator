@@ -7,7 +7,7 @@ local Is = require('__stdlib__/stdlib/utils/is')
 local Player = require('__stdlib__/stdlib/event/player')
 local table = require('__stdlib__/stdlib/utils/table')
 
-local Util = require('framework.util')
+local tools = require('framework.tools')
 
 local const = require('lib.constants')
 
@@ -15,6 +15,7 @@ local const = require('lib.constants')
 -- manage ghost building (robot building)
 --------------------------------------------------------------------------------
 
+---@param event EventData.on_built_entity | EventData.on_robot_built_entity | EventData.script_raised_revive | EventData.script_raised_built
 local function onGhostEntityCreated(event)
     local entity = event and event.entity
     script.register_on_object_destroyed(entity)
@@ -64,11 +65,12 @@ local function onEntityCreated(event)
     end
 
     -- register entity for destruction
-    script.register_on_entity_destroyed(entity)
+    script.register_on_object_destroyed(entity)
 
     This.fico:create(entity, player_index, tags)
 end
 
+---@param event EventData.on_player_mined_entity | EventData.on_robot_mined_entity | EventData.on_entity_died | EventData.script_raised_destroy
 local function onEntityDeleted(event)
     local entity = event and event.entity
 
@@ -79,19 +81,20 @@ end
 -- Entity destruction
 --------------------------------------------------------------------------------
 
-local function onEntityDestroyed(event)
+---@param event EventData.on_object_destroyed
+local function onObjectDestroyed(event)
     -- is it a ghost?
-    if storage.ghosts and storage.ghosts[event.unit_number] then
-        storage.ghosts[event.unit_number] = nil
+    if storage.ghosts and storage.ghosts[event.useful_id] then
+        storage.ghosts[event.useful_id] = nil
         return
     end
 
     -- or a main entity?
-    local fc_entity = This.fico:entity(event.unit_number)
+    local fc_entity = This.fico:entity(event.useful_id)
     if not fc_entity then return end
 
     -- main entity destroyed
-    This.fico:destroy(event.unit_number)
+    This.fico:destroy(event.useful_id)
 end
 
 --------------------------------------------------------------------------------
@@ -111,6 +114,7 @@ local function onMainEntityCloned(event)
     This.fico:create(event.destination, nil, tags)
 end
 
+---@param event EventData.on_entity_cloned
 local function onInternalEntityCloned(event)
     -- Space Exploration Support
     if not (Is.Valid(event.source) and Is.Valid(event.destination)) then return end
@@ -124,6 +128,7 @@ end
 -- Entity settings pasting
 --------------------------------------------------------------------------------
 
+---@param event EventData.on_entity_settings_pasted
 local function onEntitySettingsPasted(event)
     local player = Player.get(event.player_index)
 
@@ -134,7 +139,7 @@ local function onEntitySettingsPasted(event)
 
     if not (src_fc_entity and dst_fc_entity) then return end
 
-    dst_fc_entity.config = table.deepcopy(src_fc_entity.config)
+    dst_fc_entity.config = tools.copy(src_fc_entity.config)
     This.fico:reconfigure(dst_fc_entity)
 end
 
@@ -152,7 +157,7 @@ local function save_to_blueprint(entities, blueprint)
     -- the position of the entity. Build a double-index map that allows finding the
     -- index in the blueprint entity list by x/y coordinate.
     local blueprint_index = {}
-    for idx, blueprint_entity in pairs(blueprint.get_blueprint_entities()) do
+    for idx, blueprint_entity in pairs(blueprint.get_blueprint_entities() --[[@as [BlueprintEntity] ]]) do
         local x_map = blueprint_index[blueprint_entity.position.x] or {}
         assert(not (x_map[blueprint_entity.position.y]))
         x_map[blueprint_entity.position.y] = idx
@@ -221,14 +226,13 @@ end
 -- Configuration changes (runtime and startup)
 --------------------------------------------------------------------------------
 
----@param changed ConfigurationChangedData?
+---@param changed ConfigurationChangedData
 local function onConfigurationChanged(changed)
     if This and This.fico then
-        This.fico:clearAllSignals()
+        This.fico:clearAllFilters()
 
         for _, fc_entity in pairs(This.fico:entities()) do
-            local ex_control_behavior = fc_entity.ref.ex.get_or_create_control_behavior() --[[@as LuaConstantCombinatorControlBehavior]]
-            ex_control_behavior.parameters = This.fico:getAllSignals(ex_control_behavior.signals_count)
+            This.fico:refreshFilters(fc_entity)
         end
     end
 end
@@ -237,6 +241,7 @@ end
 -- Event ticker
 --------------------------------------------------------------------------------
 
+---@param event NthTickEventData
 local function onNthTick(event)
     if This.fico:totalCount() <= 0 then return end
 
@@ -254,22 +259,22 @@ end
 -- event registration
 --------------------------------------------------------------------------------
 
-local match_main_entities = Util.create_event_entity_matcher('name', const.main_entity_names)
-local match_internal_entities = Util.create_event_entity_matcher('name', const.internal_entity_names)
-local match_ghost_entities = Util.create_event_ghost_entity_matcher(const.main_entity_names)
+local match_main_entities = tools.create_event_entity_matcher('name', const.main_entity_names)
+local match_internal_entities = tools.create_event_entity_matcher('name', const.internal_entity_names)
+local match_ghost_entities = tools.create_event_ghost_entity_name_matcher(const.main_entity_names)
 
 -- mod init code
 Event.on_init(function() This.fico:init() end)
 
 -- manage ghost building (robot building)
-Util.event_register(const.creation_events, onGhostEntityCreated, match_ghost_entities)
+tools.event_register(tools.CREATION_EVENTS, onGhostEntityCreated, match_ghost_entities)
 
 -- entity create / delete
-Util.event_register(const.creation_events, onEntityCreated, match_main_entities)
-Util.event_register(const.deletion_events, onEntityDeleted, match_main_entities)
+tools.event_register(tools.CREATION_EVENTS, onEntityCreated, match_main_entities)
+tools.event_register(tools.DELETION_EVENTS, onEntityDeleted, match_main_entities)
 
 -- entity destroy
-Event.register(defines.events.on_entity_destroyed, onEntityDestroyed)
+Event.register(defines.events.on_object_destroyed, onObjectDestroyed)
 
 -- Entity cloning
 Event.register(defines.events.on_entity_cloned, onMainEntityCloned, match_main_entities)

@@ -2,7 +2,7 @@
 -- runtime code
 ------------------------------------------------------------------------
 
-require('lib.init')
+require('lib.init')('runtime')
 
 -- setup player management
 require('__stdlib__/stdlib/event/player').register_events(true)

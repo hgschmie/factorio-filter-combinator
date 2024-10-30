@@ -12,7 +12,10 @@ end
 
 NulliusSupport.data_updates = function()
     local recipe = data.raw.recipe[const.filter_combinator_name] --[[@as data.RecipePrototype]]
-    recipe.ingredients = { { 'copper-cable', 5 }, { 'decider-combinator', 2 } }
+    recipe.ingredients = {
+        { type = 'item', name = 'copper-cable',       amount = 5 },
+        { type = 'item', name = 'decider-combinator', amount = 2 } }
+
     recipe.subgroup = 'logistics'
     recipe.category = 'tiny-crafting'
     recipe.order = 'nullius-fa'

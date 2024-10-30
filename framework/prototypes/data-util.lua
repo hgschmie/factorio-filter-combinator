@@ -28,7 +28,7 @@ function FrameworkDataUtil.copy_prototype(prototype, new_name, remove_icon)
         error('Invalid prototype: prototypes must have name and type properties.')
         return ---@diagnostic disable-line
     end
-    local p = table.deepcopy(prototype)
+    local p = util.copy(prototype)
     p.name = new_name
     if p.minable and p.minable.result then
         p.minable.result = new_name

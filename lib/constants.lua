@@ -11,7 +11,7 @@ local Constants = {}
 --------------------------------------------------------------------------------
 
 -- the current version that is the result of the latest migration
-Constants.current_version = 8
+Constants.current_version = 9
 
 Constants.prefix = 'hps__fc-'
 Constants.name = 'filter-combinator'
@@ -89,24 +89,6 @@ Constants.entity_maps = {
 Constants.internal_entity_names = {
     Constants.internal_ac_name, Constants.internal_cc_name, Constants.internal_dc_name,
     Constants.internal_debug_ac_name, Constants.internal_debug_cc_name, Constants.internal_debug_dc_name,
-}
-
---------------------------------------------------------------------------------
--- Events
---------------------------------------------------------------------------------
-
-Constants.creation_events = {
-    defines.events.on_built_entity,
-    defines.events.on_robot_built_entity,
-    defines.events.script_raised_built,
-    defines.events.script_raised_revive,
-}
-
-Constants.deletion_events = {
-    defines.events.on_player_mined_entity,
-    defines.events.on_robot_mined_entity,
-    defines.events.on_entity_died,
-    defines.events.script_raised_destroy,
 }
 
 --------------------------------------------------------------------------------

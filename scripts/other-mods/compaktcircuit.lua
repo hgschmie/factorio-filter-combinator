@@ -81,8 +81,8 @@ end
 
 --------------------------------------------------------------------------------
 
-CompaktCircuitSupport.data = function()
-    local packed = table.deepcopy(data.raw['arithmetic-combinator'][const.filter_combinator_name])
+function CompaktCircuitSupport.data()
+    local packed =copy(data.raw['arithmetic-combinator'][const.filter_combinator_name])
 
     -- PrototypeBase
     packed.name = const.filter_combinator_name_packed
@@ -136,7 +136,7 @@ CompaktCircuitSupport.data = function()
 end
 
 
-CompaktCircuitSupport.runtime = function()
+function CompaktCircuitSupport.runtime()
     local Event = require('__stdlib__/stdlib/event/event')
 
     Event.on_init(ccs_init)

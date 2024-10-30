@@ -16,9 +16,11 @@ local default_logger = { log = log }
 ---@class FrameworkLogger
 ---@field debug_mode boolean? If true, debug and debugf produce output lines
 ---@field core_logger table<string, any> The logging target
+---@field initialized boolean if the logger was initialized
 local FrameworkLogger = {
     debug_mode = nil,
     core_logger = default_logger,
+    initialized = false,
 
     debug = dummy,
     debugf = dummy,
@@ -65,6 +67,7 @@ end
 --- writes a <module-name>/framework.log logfile by default
 function FrameworkLogger:init()
     assert(script, 'Logger can only be initalized in runtime stage')
+    if self.initialized then return end
 
     self.core_logger = StdLibLogger.new('framework', self.debug_mode, { force_append = true })
 
@@ -102,6 +105,8 @@ function FrameworkLogger:init()
     Event.register(defines.events.on_runtime_mod_setting_changed, function()
         self:updateDebugSettings()
     end)
+
+    self.initialized = true
 end
 
 return FrameworkLogger

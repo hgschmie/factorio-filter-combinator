@@ -6,7 +6,7 @@ local Event = require('__stdlib__/stdlib/event/event')
 local Player = require('__stdlib__/stdlib/event/player')
 local table = require('__stdlib__/stdlib/utils/table')
 
-local Util = require('framework.util')
+local tools = require('framework.tools')
 
 local const = require('lib.constants')
 
@@ -409,8 +409,8 @@ end
 -- GUI state updater
 ----------------------------------------------------------------------------------------------------
 
----@param gui FrameworkGui?
----@param fc_entity FilterCombinatorData?
+---@param gui FrameworkGui
+---@param fc_entity FilterCombinatorData
 update_gui_state = function(gui, fc_entity)
     local fc_config = fc_entity.config
 
@@ -422,10 +422,10 @@ update_gui_state = function(gui, fc_entity)
     on_off.switch_state = values_on_off[fc_config.enabled]
 
     local lamp = gui:find_element('lamp')
-    lamp.sprite = Util.STATUS_SPRITES[entity_status]
+    lamp.sprite = tools.STATUS_SPRITES[entity_status]
 
     local status = gui:find_element('status')
-    status.caption = { Util.STATUS_NAMES[entity_status] }
+    status.caption = { tools.STATUS_NAMES[entity_status] }
 
     local incl_excl = gui:find_element('incl-excl')
     incl_excl.switch_state = values_incl_excl[fc_config.include_mode]
@@ -466,7 +466,7 @@ gui_updater = function(ev, fc_gui)
     if not (fc_gui.last_config and table.compare(fc_gui.last_config, fc_entity.config)) then
         This.fico:reconfigure(fc_entity)
         update_gui_state(fc_gui.gui, fc_entity)
-        fc_gui.last_config = table.deepcopy(fc_entity.config)
+        fc_gui.last_config = tools.copy(fc_entity.config)
     end
 end
 
@@ -516,7 +516,7 @@ end
 -- Event registration
 ----------------------------------------------------------------------------------------------------
 
-local match_main_entities = Util.create_event_entity_matcher('name', const.main_entity_names)
+local match_main_entities = tools.create_event_entity_matcher('name', const.main_entity_names)
 
 Event.on_event(defines.events.on_gui_opened, onGuiOpened, match_main_entities)
 

@@ -4,7 +4,7 @@
 
 local Is = require('__stdlib__/stdlib/utils/is')
 local table = require('__stdlib__/stdlib/utils/table')
-local Util = require('framework.util')
+local tools = require('framework.tools')
 
 local const = require('lib.constants')
 
@@ -19,13 +19,13 @@ local FiCo = {}
 ---@field use_wire boolean
 ---@field filter_wire defines.wire_type
 ---@field include_mode boolean
----@field signals ConstantCombinatorParameters[]
+---@field filters LogisticFilter[]
 local default_config = {
     enabled = true,
     use_wire = false,
     filter_wire = defines.wire_type.green,
     include_mode = true,
-    signals = {}
+    filters = {}
 }
 
 ---@param parent_config FilterCombinatorConfig?
@@ -108,58 +108,77 @@ end
 -- "all signals" management
 ------------------------------------------------------------------------
 
---- Adds all item, fluid and virtual signals to a combinator.
----@return ConstantCombinatorParameters[] all_signals
-local function create_all_signals()
+--- create a list of all filters
+---@return LogisticFilter[] all_filters
+local function create_all_filters()
     local prototypes = {
-        item = game.item_prototypes,
-        fluid = game.fluid_prototypes,
-        virtual = game.virtual_signal_prototypes,
+        item = prototypes['item'],
+        fluid = prototypes['fluid'],
+        virtual = prototypes['virtual_signal'],
     }
 
-    local idx = 1
-
-    ---@type ConstantCombinatorParameters[]
-    local signals = {}
+    ---@type LogisticFilter[]
+    local filters = {}
 
     for type, prototype in pairs(prototypes) do
         for sig_name, p in pairs(prototype) do
-            if not (type == 'virtual' and p.special) then
-                table.insert(signals, { signal = { type = type, name = sig_name }, count = 1, index = idx })
-                idx = idx + 1
+            if not (type == 'virtual' and p.special) then -- skip 'special' virtual signals (everything, anything, each, unknown)
+                table.insert(filters, {
+                    value = {
+                        type = type,
+                        name = sig_name,
+                        quality = 'normal'                -- see https://forums.factorio.com/viewtopic.php?t=116334
+                    },
+                    min = 1
+                })
             end
         end
     end
 
-    return signals
+    return filters
 end
 
-local raise_warning = false
-local raise_warning_tick = 0
-local min_ex_parameters = 2e20
-
----@param max_signal_count integer? maximum numbers of signals returned
----@return ConstantCombinatorParameters[] all_signals
-function FiCo:getAllSignals(max_signal_count)
+---@return LogisticFilter[] all_signals
+function FiCo:getAllFilters()
     if not self.all_signals then
         if not storage.all_signals then
-            storage.all_signals = create_all_signals()
+            storage.all_signals = create_all_filters()
         end
         self.all_signals = storage.all_signals
     end
 
-    if max_signal_count and #self.all_signals > max_signal_count then
-        raise_warning = true
-        min_ex_parameters = math.min(min_ex_parameters, max_signal_count)
-        return table.slice(self.all_signals, 1, max_signal_count)
-    else
-        return self.all_signals
+    return self.all_signals
+end
+
+function FiCo:clearAllFilters()
+    self.all_signals = nil
+    storage.all_signals = nil
+end
+
+---@param control LuaConstantCombinatorControlBehavior
+---@param filters LogisticFilter[]
+local function assign_filters(control, filters)
+    assert(control.sections_count == 1)
+
+    local section = control.sections[1]
+    for i = 1, section.filters_count, 1 do
+        section.clear_slot(i)
+    end
+
+    for i = 1, #filters, 1 do
+        section.set_slot(i, filters[i])
     end
 end
 
-function FiCo:clearAllSignals()
-    self.all_signals = nil
-    storage.all_signals = nil
+--- Finds the filter section in the ex constant combinator, update all the signals in it to the current all signals count.
+-- TODO!
+---@param fc_entity FilterCombinatorData
+function FiCo:refreshFilters(fc_entity)
+    if not fc_entity then return end
+    local ex_control_behavior = fc_entity.ref.ex.get_or_create_control_behavior() --[[@as LuaConstantCombinatorControlBehavior]]
+    assert(ex_control_behavior)
+
+    assign_filters(ex_control_behavior, self:getAllFilters())
 end
 
 ------------------------------------------------------------------------
@@ -173,43 +192,59 @@ end
 ---@field dst_circuit string?
 ---@field wire string?
 
+local invert_table = table.invert(defines.wire_type)
+
+local function get_wire_name(circuit, wire)
+    circuit = circuit and 'combinator_' .. circuit or 'circuit'
+
+    local wire_name = circuit .. '_' .. wire
+    return defines.wire_connector_id[wire_name]
+end
+
 ---@param fc_entity FilterCombinatorData
 ---@param wire_cfg FcWireConfig
 ---@param wire_type table<string, defines.wire_type>?
 local function connect_wire(fc_entity, wire_cfg, wire_type)
     wire_type = wire_type or defines.wire_type
     local wire = wire_type[wire_cfg.wire or 'red']
+    local wire_name = invert_table[wire]
 
     assert(fc_entity.ref[wire_cfg.src])
     assert(fc_entity.ref[wire_cfg.dst])
 
-    assert(fc_entity.ref[wire_cfg.src].connect_neighbour {
-        target_entity = fc_entity.ref[wire_cfg.dst],
-        wire = wire,
-        source_circuit_id = wire_cfg.src_circuit and defines.circuit_connector_id['combinator_' .. wire_cfg.src_circuit],
-        target_circuit_id = wire_cfg.dst_circuit and defines.circuit_connector_id['combinator_' .. wire_cfg.dst_circuit],
-    })
+    local src_connector = fc_entity.ref[wire_cfg.src].get_wire_connector(get_wire_name(wire_cfg.src_circuit, wire_name), false)
+    local dst_connector = fc_entity.ref[wire_cfg.dst].get_wire_connector(get_wire_name(wire_cfg.dst_circuit, wire_name), false)
+
+    if src_connector and dst_connector then
+        assert(src_connector.connect_to(dst_connector, false, defines.wire_origin.script))
+    end
 end
 
 ---@param fc_entity FilterCombinatorData
 ---@param wire_cfg FcWireConfig
 local function disconnect_wire(fc_entity, wire_cfg)
     local wire = defines.wire_type[wire_cfg.wire or 'red']
+    local wire_name = invert_table[wire]
 
     assert(fc_entity.ref[wire_cfg.src])
     if wire_cfg.dst then
         assert(fc_entity.ref[wire_cfg.dst])
+        if not wire_cfg.dst_circuit then
+            wire_cfg.dst_circuit = 'output'
+        end
     end
 
-    if wire_cfg.dst then
-        fc_entity.ref[wire_cfg.src].disconnect_neighbour {
-            target_entity = fc_entity.ref[wire_cfg.dst],
-            wire = wire,
-            source_circuit_id = wire_cfg.src_circuit and defines.circuit_connector_id['combinator_' .. wire_cfg.src_circuit],
-            target_circuit_id = wire_cfg.dst_circuit and defines.circuit_connector_id['combinator_' .. wire_cfg.dst_circuit],
-        }
+    if not wire_cfg.src_circuit then
+        wire_cfg.src_circuit = 'output'
+    end
+
+    local src_connector = wire_cfg.src and fc_entity.ref[wire_cfg.src].get_wire_connector(get_wire_name(wire_cfg.src_circuit, wire_name), false)
+    local dst_connector = wire_cfg.dst and fc_entity.ref[wire_cfg.dst].get_wire_connector(get_wire_name(wire_cfg.dst_circuit, wire_name), false)
+
+    if dst_connector then
+        assert(src_connector.disconnect_from(dst_connector, defines.wire_origin.script))
     else
-        fc_entity.ref[wire_cfg.src].disconnect_neighbour(wire)
+        assert(src_connector.disconnect_all(defines.wire_origin.script))
     end
 end
 
@@ -246,18 +281,21 @@ local sub_entities = {
 
 local signal_each = { type = 'virtual', name = 'signal-each' }
 
-local initial_behavior = {
-    { src = 'filter',    comparator = '!=', copy_count_from_input = false },
-    { src = 'inp',       comparator = '<' },
-    { src = 'd2',        comparator = '>' },
-    { src = 'd3',        comparator = '>' },
-    { src = 'd4',        comparator = '<' },
-    { src = 'input_neg', operation = '*',   second_constant = 0 - (2 ^ 31 - 1) },
-    { src = 'a2',        operation = '*',   second_constant = -1 },
-    { src = 'input_pos', operation = '*',   second_constant = 2 ^ 31 - 1 },
-    { src = 'a4',        operation = '*',   second_constant = -1 },
-    { src = 'out',       operation = '+',   second_constant = 0 },
-    { src = 'inv',       operation = '*',   second_constant = -1 },
+local dc_initial_behavior = {
+    { src = 'filter', comparator = '!=', copy_count_from_input = false },
+    { src = 'inp',    comparator = '<' },
+    { src = 'd2',     comparator = '>' },
+    { src = 'd3',     comparator = '>' },
+    { src = 'd4',     comparator = '<' },
+}
+
+local ac_initial_behavior = {
+    { src = 'input_neg', operation = '*', second_constant = 0 - (2 ^ 31 - 1) },
+    { src = 'a2',        operation = '*', second_constant = -1 },
+    { src = 'input_pos', operation = '*', second_constant = 2 ^ 31 - 1 },
+    { src = 'a4',        operation = '*', second_constant = -1 },
+    { src = 'out',       operation = '+', second_constant = 0 },
+    { src = 'inv',       operation = '*', second_constant = -1 },
 }
 
 local wiring = {
@@ -414,7 +452,7 @@ function FiCo:reconfigure(fc_entity)
 
     local fc_config = fc_entity.config
 
-    local enabled = fc_config.enabled and Util.STATUS_TABLE[fc_entity.config.status] ~= 'RED'
+    local enabled = fc_config.enabled and tools.STATUS_TABLE[fc_entity.config.status] ~= 'RED'
 
     -- disconnect wires in case the combinator was turned off
     for _, cfg in pairs(wiring.disconnect1) do
@@ -423,15 +461,19 @@ function FiCo:reconfigure(fc_entity)
 
     -- turn the constant combinators on or off
     -- fc_entity.ref.main.active = enabled
-    fc_entity.ref.ex.get_or_create_control_behavior().enabled = enabled
+
+    local ex_control = fc_entity.ref.ex.get_or_create_control_behavior() --[[@as LuaConstantCombinatorControlBehavior]]
+    assert(ex_control)
+    ex_control.enabled = enabled
 
     local cc_control = fc_entity.ref.cc.get_or_create_control_behavior() --[[@as LuaConstantCombinatorControlBehavior ]]
+    assert(cc_control)
     cc_control.enabled = enabled
 
     if not enabled then return end
 
     -- setup the signals for the cc
-    cc_control.parameters = table.deepcopy(fc_config.signals)
+    assign_filters(cc_control, fc_config.filters)
 
     -- disconnect wires for rewiring
     for _, cfg in pairs(wiring.disconnect2) do
@@ -542,7 +584,7 @@ function FiCo:create(main, player_index, tags)
 
     local fc_entity = {
         main = main,
-        config = table.deepcopy(config), -- config may refer to the signal object in parent or default config.
+        config = tools.copy(config), -- config may refer to the signal object in parent or default config.
         entities = {},
         ref = { main = main },
     }
@@ -558,19 +600,47 @@ function FiCo:create(main, player_index, tags)
     end
 
     local ex_control_behavior = fc_entity.ref.ex.get_or_create_control_behavior() --[[@as LuaConstantCombinatorControlBehavior]]
-    ex_control_behavior.parameters = self:getAllSignals(ex_control_behavior.signals_count)
+    assert(ex_control_behavior)
+    ex_control_behavior.remove_section(1)
+    ex_control_behavior.add_section(const.name)
+    assert(ex_control_behavior.sections_count == 1)
+
+    assign_filters(ex_control_behavior, self:getAllFilters())
+
+    local cc_control_behavior = fc_entity.ref.cc.get_or_create_control_behavior() --[[@as LuaConstantCombinatorControlBehavior]]
+    assert(cc_control_behavior)
+    cc_control_behavior.remove_section(1)
+    cc_control_behavior.add_section(const.name)
+    assert(cc_control_behavior.sections_count == 1)
 
     -- setup all the sub-entities
-    for _, behavior in pairs(initial_behavior) do
+    for _, behavior in pairs(ac_initial_behavior) do
         local parameters = {
             first_signal = behavior.first_signal or signal_each,
             output_signal = behavior.output_signal or signal_each,
-            comparator = behavior.comparator,
             operation = behavior.operation,
             copy_count_from_input = behavior.copy_count_from_input,
             second_constant = behavior.second_constant
         }
-        fc_entity.ref[behavior.src].get_or_create_control_behavior().parameters = parameters
+        local ac_control_behavior = fc_entity.ref[behavior.src].get_or_create_control_behavior() --[[@as LuaArithmeticCombinatorControlBehavior]]
+        ac_control_behavior.parameters = parameters
+    end
+
+    for _, behavior in pairs(dc_initial_behavior) do
+        local condition = {
+            first_signal = behavior.first_signal or signal_each,
+            comparator = behavior.comparator,
+            constant = behavior.second_constant
+        }
+
+        local output = {
+            output_signal = behavior.output_signal or signal_each,
+            copy_count_from_input = behavior.copy_count_from_input,
+        }
+
+        local dc_control_behavior = fc_entity.ref[behavior.src].get_or_create_control_behavior() --[[@as LuaDeciderCombinatorControlBehavior]]
+        dc_control_behavior.set_condition(1, condition)
+        dc_control_behavior.set_output(1, output)
     end
 
     -- setup the initial wiring
@@ -606,20 +676,6 @@ end
 --- the GUI.
 ---@param fc_entity FilterCombinatorData
 function FiCo:tick(fc_entity)
-    if raise_warning and game.tick > raise_warning_tick then
-        raise_warning = false
-        raise_warning_tick = game.tick + 3600 -- raise every minute
-
-        local all_signals = self:getAllSignals()
-        Framework.logger:debugf('All-signals list size exceeds the maximum number of supported signals: %d vs. %d', #all_signals, min_ex_parameters)
-
-        if Framework.settings:runtime().debug_mode then
-            for _, player in pairs(game.players) do
-                player.print(('[Filter Combinator Reimagined] All-signals list size exceeds the maximum number of supported signals: %d vs. %d'):format(#all_signals, min_ex_parameters))
-            end
-        end
-    end
-
     if not fc_entity then return end
 
     -- update status based on the main entity

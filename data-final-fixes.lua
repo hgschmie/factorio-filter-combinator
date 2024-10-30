@@ -2,7 +2,7 @@
 -- data phase 3
 ------------------------------------------------------------------------
 
-require('lib.init')
+require('lib.init')('data')
 local const = require('lib.constants')
 
 -- 20 is a fudge factor to account for some modules adding items in their final-fixes stage
@@ -22,9 +22,10 @@ end
 -- round up
 count = 10 * math.ceil(count / 10)
 
-data.raw['constant-combinator'][const.internal_cc_name].item_slot_count = count
--- visible cc for debugging with larger slot count
-data.raw['constant-combinator'][const.internal_debug_cc_name].item_slot_count = count
+-- TODO we may no longer need this...
+-- data.raw['constant-combinator'][const.internal_cc_name].item_slot_count = count
+-- -- visible cc for debugging with larger slot count
+-- data.raw['constant-combinator'][const.internal_debug_cc_name].item_slot_count = count
 
 --------------------------------------------------------------------------------
 require('framework.other-mods').data_final_fixes()

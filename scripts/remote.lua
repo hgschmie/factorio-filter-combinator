@@ -1,10 +1,9 @@
 ------------------------------------------------------------------------
 -- Remote API
 ------------------------------------------------------------------------
-require('lib.init')
+require('lib.init')('runtime')
 
-local const = require('lib.constants')
-local table = require('__stdlib__/stdlib/utils/table')
+local tools = require('framework.tools')
 
 ---@param entity_id integer
 ---@return FilterCombinatorConfig? config
@@ -21,7 +20,7 @@ local function set_config(entity_id, config)
     local fc_entity = This.fico:entity(entity_id)
     if not fc_entity then return end
 
-    fc_entity.config = table.deepcopy(config)
+    fc_entity.config = tools.copy(config)
     This.fico:reconfigure(fc_entity)
 end
 

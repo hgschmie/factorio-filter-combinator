@@ -2,9 +2,9 @@
 -- Filter combinator GUI
 ------------------------------------------------------------------------
 
-local Event = require('__stdlib__/stdlib/event/event')
-local Player = require('__stdlib__/stdlib/event/player')
-local table = require('__stdlib__/stdlib/utils/table')
+local Event = require('__stdlib2__/stdlib/event/event')
+local Player = require('__stdlib2__/stdlib/event/player')
+local table = require('__stdlib2__/stdlib/utils/table')
 
 local tools = require('framework.tools')
 

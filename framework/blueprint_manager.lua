@@ -3,10 +3,10 @@
 -- Manage blueprint related state
 ------------------------------------------------------------------------
 
-local Event = require('__stdlib__/stdlib/event/event')
-local Is = require('__stdlib__/stdlib/utils/is')
-local Player = require('__stdlib__/stdlib/event/player')
-local table = require('__stdlib__/stdlib/utils/table')
+local Event = require('__stdlib2__/stdlib/event/event')
+local Is = require('__stdlib2__/stdlib/utils/is')
+local Player = require('__stdlib2__/stdlib/event/player')
+local table = require('__stdlib2__/stdlib/utils/table')
 
 ---@alias FrameworkBlueprintMatcher fun(blueprint: LuaItemStack, idx: integer, entity: LuaEntity)
 

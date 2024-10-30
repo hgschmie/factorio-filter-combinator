@@ -2,10 +2,10 @@
 -- event setup for the mod
 --------------------------------------------------------------------------------
 
-local Event = require('__stdlib__/stdlib/event/event')
-local Is = require('__stdlib__/stdlib/utils/is')
-local Player = require('__stdlib__/stdlib/event/player')
-local table = require('__stdlib__/stdlib/utils/table')
+local Event = require('__stdlib2__/stdlib/event/event')
+local Is = require('__stdlib2__/stdlib/utils/is')
+local Player = require('__stdlib2__/stdlib/event/player')
+local table = require('__stdlib2__/stdlib/utils/table')
 
 local tools = require('framework.tools')
 

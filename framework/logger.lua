@@ -3,7 +3,7 @@
 -- Framework logger
 ------------------------------------------------------------------------
 
-local StdLibLogger = require('__stdlib__/stdlib/misc/logger')
+local StdLibLogger = require('__stdlib2__/stdlib/misc/logger')
 
 ----------------------------------------------------------------------------------------------------
 
@@ -80,7 +80,7 @@ function FrameworkLogger:init()
 
     self:updateDebugSettings()
 
-    local Event = require('__stdlib__/stdlib/event/event')
+    local Event = require('__stdlib2__/stdlib/event/event')
 
     -- The runtime storage is only available from an event. Schedule logging (and loading) for RUN_ID and GAME_ID
     -- in a tick event, then remove the event handler again.

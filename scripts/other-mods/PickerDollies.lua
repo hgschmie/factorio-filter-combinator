@@ -3,7 +3,7 @@
 --------------------------------------------------------------------------------
 
 local const = require('lib.constants')
-local Is = require('__stdlib__/stdlib/utils/is')
+local Is = require('__stdlib2__/stdlib/utils/is')
 
 local PickerDolliesSupport = {}
 
@@ -19,7 +19,7 @@ end
 --------------------------------------------------------------------------------
 
 PickerDolliesSupport.runtime = function()
-    local Event = require('__stdlib__/stdlib/event/event')
+    local Event = require('__stdlib2__/stdlib/event/event')
 
     local picker_dollies_init = function()
         if not remote.interfaces['PickerDollies'] then return end

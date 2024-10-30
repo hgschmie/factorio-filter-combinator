@@ -3,8 +3,8 @@
 -- access to the framework provided runtime storage - ported from flib
 ----------------------------------------------------------------------------------------------------
 
-local Player = require('__stdlib__/stdlib/event/player')
-local table = require('__stdlib__/stdlib/utils/table')
+local Player = require('__stdlib2__/stdlib/event/player')
+local table = require('__stdlib2__/stdlib/utils/table')
 
 --- Main class governing the runtime.
 -- Runtime exists during gameplay.

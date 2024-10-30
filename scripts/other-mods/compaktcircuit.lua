@@ -3,7 +3,7 @@
 --------------------------------------------------------------------------------
 
 local const = require('lib.constants')
-local Is = require('__stdlib__/stdlib/utils/is')
+local Is = require('__stdlib2__/stdlib/utils/is')
 
 local CompaktCircuitSupport = {}
 
@@ -137,7 +137,7 @@ end
 
 
 function CompaktCircuitSupport.runtime()
-    local Event = require('__stdlib__/stdlib/event/event')
+    local Event = require('__stdlib2__/stdlib/event/event')
 
     Event.on_init(ccs_init)
     Event.on_load(ccs_init)

@@ -2,8 +2,8 @@
 -- Filter combinator main code
 ------------------------------------------------------------------------
 
-local Is = require('__stdlib__/stdlib/utils/is')
-local table = require('__stdlib__/stdlib/utils/table')
+local Is = require('__stdlib2__/stdlib/utils/is')
+local table = require('__stdlib2__/stdlib/utils/table')
 local tools = require('framework.tools')
 
 local const = require('lib.constants')

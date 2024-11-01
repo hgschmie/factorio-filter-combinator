@@ -108,20 +108,17 @@ cc.selectable_in_game = false
 -- for debugging, add a tint to make them more visible
 local debug_ac = util.copy(data.raw['arithmetic-combinator']['arithmetic-combinator']) --[[@as data.ArithmeticCombinatorPrototype]]
 debug_ac.name = const.internal_debug_ac_name
-debug_ac.hidden = false
-debug_ac.draw_circuit_wires = true
+debug_ac.hidden_in_factoriopedia = true
 
 local debug_cc = util.copy(data.raw['constant-combinator']['constant-combinator']) --[[@as data.ConstantCombinatorPrototype]]
 debug_cc.name = const.internal_debug_cc_name
-debug_cc.hidden = false
-debug_cc.draw_circuit_wires = true
+debug_cc.hidden_in_factoriopedia = true
 
 local debug_dc = util.copy(data.raw['decider-combinator']['decider-combinator']) --[[@as data.DeciderCombinatorPrototype]]
 debug_dc.name = const.internal_debug_dc_name
-debug_dc.hidden = false
-debug_dc.draw_circuit_wires = true
+debug_dc.hidden_in_factoriopedia = true
 
-local tint = { r = 0, g = 0.8, b = 0.4, a = 1}
+local tint = { r = 0, g = 0.8, b = 0.6, a = 1}
 for _, directions in pairs({'north', 'south','east','west'}) do
     debug_ac.sprites[directions].layers[1].tint = tint
     debug_cc.sprites[directions].layers[1].tint = tint

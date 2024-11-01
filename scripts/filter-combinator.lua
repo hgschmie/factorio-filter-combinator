@@ -127,7 +127,7 @@ local function create_all_filters()
                     value = {
                         type = type,
                         name = sig_name,
-                        quality = 'normal'                -- see https://forums.factorio.com/viewtopic.php?t=116334
+                        quality = 'normal' -- see https://forums.factorio.com/viewtopic.php?t=116334
                     },
                     min = 1
                 })
@@ -158,20 +158,31 @@ end
 ---@param control LuaConstantCombinatorControlBehavior
 ---@param filters LogisticFilter[]
 local function assign_filters(control, filters)
-    assert(control.sections_count == 1)
-
-    local section = control.sections[1]
-    for i = 1, section.filters_count, 1 do
-        section.clear_slot(i)
+    for i = 1, control.sections_count, 1 do
+        control.remove_section(i)
     end
 
-    for i = 1, #filters, 1 do
-        section.set_slot(i, filters[i])
+    ---@type LuaLogisticSection?
+    local section
+    ---@type integer
+    local idx = -1
+
+    for i, filter in pairs(filters) do
+        local pos
+        repeat
+            pos = i - idx * 1000
+            if pos > 1000 then section = nil end
+            if not section then
+                section = control.add_section()
+                idx = idx + 1
+            end
+            assert(section)
+        until pos <= 1000 -- max number of slots in a single LuaLogisticSection
+        section.filters[pos] = filter
     end
 end
 
 --- Finds the filter section in the ex constant combinator, update all the signals in it to the current all signals count.
--- TODO!
 ---@param fc_entity FilterCombinatorData
 function FiCo:refreshFilters(fc_entity)
     if not fc_entity then return end
@@ -209,6 +220,8 @@ local function connect_wire(fc_entity, wire_cfg, wire_type)
     local wire = wire_type[wire_cfg.wire or 'red']
     local wire_name = invert_table[wire]
 
+    local wire_origin = defines.wire_origin[fc_entity.comb_visible and 'player' or 'script']
+
     assert(fc_entity.ref[wire_cfg.src])
     assert(fc_entity.ref[wire_cfg.dst])
 
@@ -216,7 +229,7 @@ local function connect_wire(fc_entity, wire_cfg, wire_type)
     local dst_connector = fc_entity.ref[wire_cfg.dst].get_wire_connector(get_wire_name(wire_cfg.dst_circuit, wire_name), false)
 
     if src_connector and dst_connector then
-        assert(src_connector.connect_to(dst_connector, false, defines.wire_origin.script))
+        assert(src_connector.connect_to(dst_connector, false, wire_origin))
     end
 end
 
@@ -226,25 +239,23 @@ local function disconnect_wire(fc_entity, wire_cfg)
     local wire = defines.wire_type[wire_cfg.wire or 'red']
     local wire_name = invert_table[wire]
 
+    local wire_origin = defines.wire_origin[fc_entity.comb_visible and 'player' or 'script']
+
     assert(fc_entity.ref[wire_cfg.src])
+
     if wire_cfg.dst then
         assert(fc_entity.ref[wire_cfg.dst])
-        if not wire_cfg.dst_circuit then
-            wire_cfg.dst_circuit = 'output'
-        end
-    end
-
-    if not wire_cfg.src_circuit then
-        wire_cfg.src_circuit = 'output'
     end
 
     local src_connector = wire_cfg.src and fc_entity.ref[wire_cfg.src].get_wire_connector(get_wire_name(wire_cfg.src_circuit, wire_name), false)
+    assert(src_connector)
+
     local dst_connector = wire_cfg.dst and fc_entity.ref[wire_cfg.dst].get_wire_connector(get_wire_name(wire_cfg.dst_circuit, wire_name), false)
 
     if dst_connector then
-        assert(src_connector.disconnect_from(dst_connector, defines.wire_origin.script))
+        src_connector.disconnect_from(dst_connector, wire_origin)
     else
-        assert(src_connector.disconnect_all(defines.wire_origin.script))
+        src_connector.disconnect_all(wire_origin)
     end
 end
 
@@ -517,7 +528,7 @@ end
 ---@field entity FilterCombinatorData
 ---@field type string
 ---@field ignore boolean?
----@field player_index integer?
+---@field comb_visible boolean
 ---@field x integer?
 ---@field y integer?
 
@@ -525,12 +536,8 @@ end
 local function create_internal_entity(cfg)
     local fc_entity = cfg.entity
     local type = cfg.type
+    local comb_visible = cfg.comb_visible
 
-    local player_index = cfg.player_index
-
-    -- ignored combinators are always invisible
-    -- if no player index was passed, combinators are invisible
-    local comb_visible = player_index and Framework.settings:player(player_index).comb_visible
 
     -- invisible combinators share position with the main unit
     local x = (comb_visible and cfg.x or 0) or 0
@@ -556,6 +563,7 @@ local function create_internal_entity(cfg)
 
     sub_entity.minable = false
     sub_entity.destructible = false
+    sub_entity.operable = comb_visible -- for debugging
 
     fc_entity.entities[sub_entity.unit_number] = sub_entity
 
@@ -578,13 +586,18 @@ function FiCo:create(main, player_index, tags)
 
     assert(self:entity(entity_id) == nil)
 
+    -- if true, draw all combinators and wires. For debugging
+    local comb_visible = player_index and Framework.settings:player(player_index).comb_visible --[[@as boolean]]
+
     -- if tags were passed in and they contain a fc config, use that.
     local config = create_config(tags and tags['fc_config'] --[[@as FilterCombinatorConfig]])
     config.status = main.status
 
+    ---@type FilterCombinatorData
     local fc_entity = {
         main = main,
         config = tools.copy(config), -- config may refer to the signal object in parent or default config.
+        comb_visible = comb_visible,
         entities = {},
         ref = { main = main },
     }
@@ -595,23 +608,17 @@ function FiCo:create(main, player_index, tags)
             type = cfg.type,
             x = cfg.x,
             y = cfg.y,
-            player_index = player_index
+            comb_visible = fc_entity.comb_visible
         }
     end
 
     local ex_control_behavior = fc_entity.ref.ex.get_or_create_control_behavior() --[[@as LuaConstantCombinatorControlBehavior]]
     assert(ex_control_behavior)
-    ex_control_behavior.remove_section(1)
-    ex_control_behavior.add_section(const.name)
-    assert(ex_control_behavior.sections_count == 1)
 
     assign_filters(ex_control_behavior, self:getAllFilters())
 
     local cc_control_behavior = fc_entity.ref.cc.get_or_create_control_behavior() --[[@as LuaConstantCombinatorControlBehavior]]
     assert(cc_control_behavior)
-    cc_control_behavior.remove_section(1)
-    cc_control_behavior.add_section(const.name)
-    assert(cc_control_behavior.sections_count == 1)
 
     -- setup all the sub-entities
     for _, behavior in pairs(ac_initial_behavior) do
@@ -717,5 +724,6 @@ return FiCo
 ---@class FilterCombinatorData
 ---@field main LuaEntity
 ---@field config FilterCombinatorConfig
+---@field comb_visible boolean
 ---@field entities LuaEntity[]
 ---@field ref table<string, LuaEntity>

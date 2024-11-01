@@ -36,7 +36,7 @@ local function get_ui(fc_entity)
         children = {
             { -- Title Bar
                 type = 'flow',
-                style = 'framework_titlebar_flow',
+                style = 'frame_header_flow',
                 drag_target = 'gui_root',
                 children = {
                     {
@@ -54,7 +54,7 @@ local function get_ui(fc_entity)
                     {
                         type = 'sprite-button',
                         style = 'frame_action_button',
-                        sprite = 'utility/close_white',
+                        sprite = 'utility/close',
                         hovered_sprite = 'utility/close_black',
                         clicked_sprite = 'utility/close_black',
                         mouse_button_filter = { 'left' },
@@ -62,172 +62,174 @@ local function get_ui(fc_entity)
                     },
                 },
             }, -- Title Bar End
-            {
+            {  -- Body
                 type = 'frame',
-                style = 'inside_shallow_frame_with_padding',
-                direction = 'vertical',
+                style = 'entity_frame',
                 children = {
                     {
                         type = 'flow',
-                        style = 'framework_indicator_flow',
-                        children = {
-                            {
-                                type = 'sprite',
-                                name = 'lamp',
-                                style = 'framework_indicator',
-                            },
-                            {
-                                type = 'label',
-                                style = 'label',
-                                name = 'status',
-                            },
-                            {
-                                type = 'empty-widget',
-                                name = 'spacer',
-                                style_mods = { horizontally_stretchable = true },
-                            },
-                            {
-                                type = 'label',
-                                style = 'label',
-                                caption = 'ID: ' .. fc_entity.main.unit_number,
-                            },
-                        },
-                    },
-                    { -- Add some spacing
-                        type = 'frame',
-                        style = 'container_invisible_frame_with_title',
-                    },
-                    {
-                        type = 'frame',
-                        style = 'deep_frame_in_shallow_frame',
-                        name = 'preview_frame',
-                        children = {
-                            {
-                                type = 'entity-preview',
-                                name = 'preview',
-                                style = 'wide_entity_button',
-                                elem_mods = { entity = fc_entity.main },
-                            },
-                        },
-                    },
-                    { -- Add some spacing
-                        type = 'frame',
-                        style = 'container_invisible_frame_with_title',
-                    },
-                    {
-                        type = 'frame',
-                        style = 'container_invisible_frame_with_title',
-                        children = {
-                            {
-                                type = 'label',
-                                style = 'heading_3_label',
-                                caption = { 'gui-constant.output' },
-                            },
-                        },
-                    },
-                    {
-                        type = 'switch',
-                        name = 'on-off',
-                        right_label_caption = { 'gui-constant.on' },
-                        left_label_caption = { 'gui-constant.off' },
-                        handler = { [defines.events.on_gui_switch_state_changed] = onSwitchEnabled },
-                    },
-                    { -- Add some spacing
-                        type = 'frame',
-                        style = 'container_invisible_frame_with_title',
-                    },
-                    {
-                        type = 'frame',
-                        style = 'container_invisible_frame_with_title',
-                        children = {
-                            {
-                                type = 'label',
-                                style = 'heading_3_label',
-                                caption = { const:locale('mode-heading') },
-                            },
-                        },
-                    },
-                    {
-                        type = 'switch',
-                        name = 'incl-excl',
-                        right_label_caption = { const:locale('mode-exclude') },
-                        right_label_tooltip = { const:locale('mode-exclude-tooltip') },
-                        left_label_caption = { const:locale('mode-include') },
-                        left_label_tooltip = { const:locale('mode-include-tooltip') },
-                        handler = { [defines.events.on_gui_switch_state_changed] = onSwitchExclusive },
-                    },
-                    { -- Add some spacing
-                        type = 'frame',
-                        style = 'container_invisible_frame_with_title',
-                    },
-                    {
-                        type = 'checkbox',
-                        caption = { const:locale('mode-wire') },
-                        name = 'mode-wire',
-                        handler = { [defines.events.on_gui_checked_state_changed] = onToggleWireMode },
-                        state = false,
-                    },
-                    { -- Add some spacing
-                        type = 'frame',
-                        style = 'container_invisible_frame_with_title',
-                    },
-                    {
-                        type = 'flow',
-                        direction = 'horizontal',
-                        name = 'wire-select',
-                        children = {
-                            {
-                                type = 'radiobutton',
-                                caption = { 'item-name.red-wire' },
-                                name = 'red-wire-indicator',
-                                handler = { [defines.events.on_gui_checked_state_changed] = onSwitchRedWire },
-                                state = false,
-                            },
-                            {
-                                type = 'radiobutton',
-                                caption = { 'item-name.green-wire' },
-                                name = 'green-wire-indicator',
-                                handler = { [defines.events.on_gui_checked_state_changed] = onSwitchGreenWire },
-                                state = false,
-                            },
-                        },
-                    },
-                    {
-                        type = 'flow',
+                        style = 'two_module_spacing_vertical_flow',
                         direction = 'vertical',
-                        name = 'item-grid',
                         children = {
-                            { -- Add some spacing
-                                type = 'frame',
-                                style = 'container_invisible_frame_with_title',
-                            },
                             {
-                                type = 'line',
-                            },
-                            {
-                                type = 'frame',
-                                style = 'container_invisible_frame_with_title',
+                                type = 'flow',
+                                style = 'framework_indicator_flow',
                                 children = {
                                     {
+                                        type = 'sprite',
+                                        name = 'lamp',
+                                        style = 'framework_indicator',
+                                    },
+                                    {
                                         type = 'label',
-                                        style = 'heading_3_label',
-                                        caption = { const:locale('signals-heading') },
+                                        style = 'label',
+                                        name = 'status',
+                                    },
+                                    {
+                                        type = 'empty-widget',
+                                        name = 'spacer',
+                                        style_mods = { horizontally_stretchable = true },
+                                    },
+                                    {
+                                        type = 'label',
+                                        style = 'label',
+                                        caption = 'ID: ' .. fc_entity.main.unit_number,
                                     },
                                 },
                             },
                             {
-                                type = 'scroll-pane',
-                                style = 'constant_combinator_logistics_scroll_pane',
+                                type = 'frame',
+                                style = 'deep_frame_in_shallow_frame',
+                                name = 'preview_frame',
                                 children = {
                                     {
-                                        type = 'frame',
-                                        style = 'deep_frame_in_shallow_frame',
+                                        type = 'entity-preview',
+                                        name = 'preview',
+                                        style = 'wide_entity_button',
+                                        elem_mods = { entity = fc_entity.main },
+                                    },
+                                },
+                            },
+                            -- {                    -- Add some spacing
+                            --     type = 'frame',
+                            --     style = 'frame', -- container_invisible_frame_with_title'
+                            -- },
+                            -- {
+                            --     type = 'frame',
+                            --     style = 'frame', -- container_invisible_frame_with_title'
+                            --     children = {
+                            {
+                                type = 'label',
+                                style = 'semibold_label', -- heading_3_label'
+                                caption = { 'gui-constant.output' },
+                            },
+                            --     },
+                            -- },
+                            {
+                                type = 'switch',
+                                name = 'on-off',
+                                right_label_caption = { 'gui-constant.on' },
+                                left_label_caption = { 'gui-constant.off' },
+                                handler = { [defines.events.on_gui_switch_state_changed] = onSwitchEnabled },
+                            },
+                            -- {                    -- Add some spacing
+                            --     type = 'frame',
+                            --     style = 'frame', -- container_invisible_frame_with_title'
+                            -- },
+                            -- {
+                            --     type = 'frame',
+                            --     style = 'frame', -- container_invisible_frame_with_title'
+                            --     children = {
+                            {
+                                type = 'label',
+                                style = 'semibold_label', -- heading_3_label'
+                                caption = { const:locale('mode-heading') },
+                            },
+                            --     },
+                            -- },
+                            {
+                                type = 'switch',
+                                name = 'incl-excl',
+                                right_label_caption = { const:locale('mode-exclude') },
+                                right_label_tooltip = { const:locale('mode-exclude-tooltip') },
+                                left_label_caption = { const:locale('mode-include') },
+                                left_label_tooltip = { const:locale('mode-include-tooltip') },
+                                handler = { [defines.events.on_gui_switch_state_changed] = onSwitchExclusive },
+                            },
+                            -- {                    -- Add some spacing
+                            --     type = 'frame',
+                            --     style = 'frame', -- container_invisible_frame_with_title'
+                            -- },
+                            {
+                                type = 'checkbox',
+                                caption = { const:locale('mode-wire') },
+                                name = 'mode-wire',
+                                handler = { [defines.events.on_gui_checked_state_changed] = onToggleWireMode },
+                                state = false,
+                            },
+                            -- {                    -- Add some spacing
+                            --     type = 'frame',
+                            --     style = 'frame', -- container_invisible_frame_with_title'
+                            -- },
+                            {
+                                type = 'flow',
+                                direction = 'horizontal',
+                                name = 'wire-select',
+                                children = {
+                                    {
+                                        type = 'radiobutton',
+                                        caption = { 'item-name.red-wire' },
+                                        name = 'red-wire-indicator',
+                                        handler = { [defines.events.on_gui_checked_state_changed] = onSwitchRedWire },
+                                        state = false,
+                                    },
+                                    {
+                                        type = 'radiobutton',
+                                        caption = { 'item-name.green-wire' },
+                                        name = 'green-wire-indicator',
+                                        handler = { [defines.events.on_gui_checked_state_changed] = onSwitchGreenWire },
+                                        state = false,
+                                    },
+                                },
+                            },
+                            {
+                                type = 'flow',
+                                direction = 'vertical',
+                                name = 'item-grid',
+                                children = {
+                                    -- {                    -- Add some spacing
+                                    --     type = 'frame',
+                                    --     style = 'frame', -- container_invisible_frame_with_title'
+                                    -- },
+                                    {
+                                        type = 'line',
+                                    },
+                                    -- {
+                                    --     type = 'frame',
+                                    --     style = 'frame', -- container_invisible_frame_with_title'
+                                    --     children = {
+                                    {
+                                        type = 'label',
+                                        style = 'semibold_label', -- heading_3_label'
+                                        caption = { const:locale('signals-heading') },
+                                    },
+                                    --     },
+                                    -- },
+                                    {
+                                        type = 'scroll-pane',
+                                        style = 'logistic_sections_scroll_pane', -- constant_combinator_logistics_scroll_pane
                                         children = {
                                             {
-                                                type = 'table',
-                                                name = 'signals',
-                                                style = 'slot_table',
-                                                column_count = 10,
+                                                type = 'frame',
+                                                style = 'deep_frame_in_shallow_frame',
+                                                children = {
+                                                    {
+                                                        type = 'table',
+                                                        name = 'signals',
+                                                        style = 'slot_table',
+                                                        column_count = 10,
+                                                    },
+                                                },
                                             },
                                         },
                                     },
@@ -362,10 +364,21 @@ onSelectSignal = function(event)
 
     local signal = event.element.elem_value --[[@as SignalID]]
     local slot = event.element.tags.idx --[[@as number]]
-    fc_entity.config.signals[slot] = {
-        signal = signal,
-        count = 1,
-        index = slot
+
+    for _, filter in pairs(fc_entity.config.filters) do
+        if filter.value.name == signal.name and filter.value.type == signal.type then
+            event.element.elem_value = nil
+            local player = Player.get(event.player_index)
+            local item_name = prototypes[signal.type or 'item'][signal.name].localised_name
+            player.create_local_flying_text { text = { const:locale('signal-selected'), item_name }, create_at_cursor = true }
+            player.play_sound { path = "utility/cannot_build", position = player.position, volume = 1 }
+            return
+        end
+    end
+
+    fc_entity.config.filters[slot] = {
+        value = { name = signal.name, type = signal.type, quality = 'normal' },
+        min = 1,
     }
 end
 
@@ -376,12 +389,12 @@ end
 ---@param fc_entity FilterCombinatorData
 ---@return FrameworkGuiElemDef[] gui_elements
 local function make_grid_buttons(fc_entity)
-    local signals = fc_entity.config.signals
-    local all_signals_count = #(This.fico:getAllSignals())
+    local filters = fc_entity.config.filters
+    local all_filters_count = #(This.fico:getAllFilters())
     local list = {}
 
     -- round to next 10 signals to make nice lines.
-    local row_count = math.floor(all_signals_count / 10)
+    local row_count = math.floor(all_filters_count / 10) -- 0 ... floor, not 1 ... ceil
 
     for i = 0, row_count do
         local has_signals = false
@@ -394,7 +407,9 @@ local function make_grid_buttons(fc_entity)
                 elem_type = 'signal',
                 handler = { [defines.events.on_gui_elem_changed] = onSelectSignal },
             }
-            entry.signal = (signals[idx] and signals[idx].signal) or nil
+            if filters[idx] and filters[idx].value then
+                entry.signal = { name = filters[idx].value.name, type = filters[idx].value.type }
+            end
             has_signals = (entry.signal and true or false) or has_signals
             table.insert(list, entry)
         end

@@ -40,6 +40,4 @@ fc.xor_symbol_sprites = full_sprite
 fc.icon = const:png('filter-combinator-improved')
 fc.minable.result = fc.name
 
--- TODO - deal with factoriopedia
-
 data:extend { fc }

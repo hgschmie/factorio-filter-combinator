@@ -178,7 +178,7 @@ local function assign_filters(control, filters)
             end
             assert(section)
         until pos <= 1000 -- max number of slots in a single LuaLogisticSection
-        section.filters[pos] = filter
+        section.set_slot(pos, filter)
     end
 end
 
@@ -290,7 +290,7 @@ local sub_entities = {
     { id = 'd4',        type = 'dc', x = 4,  y = 0 },
 }
 
-local signal_each = { type = 'virtual', name = 'signal-each' }
+local signal_each = { type = 'virtual', name = 'signal-each', quality = 'normal' }
 
 local dc_initial_behavior = {
     { src = 'filter', comparator = '!=', copy_count_from_input = false },
@@ -641,7 +641,7 @@ function FiCo:create(main, player_index, tags)
         }
 
         local output = {
-            output_signal = behavior.output_signal or signal_each,
+            signal = behavior.output_signal or signal_each,
             copy_count_from_input = behavior.copy_count_from_input,
         }
 

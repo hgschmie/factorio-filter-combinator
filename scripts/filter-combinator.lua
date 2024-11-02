@@ -720,10 +720,3 @@ end
 ------------------------------------------------------------------------
 
 return FiCo
-
----@class FilterCombinatorData
----@field main LuaEntity
----@field config FilterCombinatorConfig
----@field comb_visible boolean
----@field entities LuaEntity[]
----@field ref table<string, LuaEntity>

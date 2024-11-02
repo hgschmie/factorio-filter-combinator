@@ -675,6 +675,22 @@ function FiCo:destroy(entity_id)
     self:setEntity(entity_id, nil)
 end
 
+--------------------------------------------------------------------------------
+-- Blueprint
+--------------------------------------------------------------------------------
+
+---@param blueprint LuaItemStack
+---@param idx integer
+---@param entity LuaEntity
+function FiCo.blueprint_callback(blueprint, idx, entity)
+    if not Is.Valid(entity) then return end
+
+    local fico_entity = This.fico:entity(entity.unit_number)
+    if not fico_entity then return end
+
+    blueprint.set_blueprint_entity_tag(idx, 'fc_config', fico_entity.config)
+end
+
 ------------------------------------------------------------------------
 -- ticker code, updates the status
 ------------------------------------------------------------------------

@@ -5,7 +5,6 @@
 local Event = require('__stdlib2__/stdlib/event/event')
 local Is = require('__stdlib2__/stdlib/utils/is')
 local Player = require('__stdlib2__/stdlib/event/player')
-local table = require('__stdlib2__/stdlib/utils/table')
 
 local tools = require('framework.tools')
 
@@ -108,85 +107,6 @@ local function onEntitySettingsPasted(event)
 end
 
 --------------------------------------------------------------------------------
--- Blueprint / copy&paste management
---------------------------------------------------------------------------------
-
----@param blueprint LuaItemStack
----@param entities LuaEntity[]
-local function save_to_blueprint(entities, blueprint)
-    if not entities or #entities < 1 then return end
-    if not (blueprint and blueprint.is_blueprint_setup()) then return end
-
-    -- blueprints hold a set of entities without any identifying information besides
-    -- the position of the entity. Build a double-index map that allows finding the
-    -- index in the blueprint entity list by x/y coordinate.
-    local blueprint_index = {}
-    for idx, blueprint_entity in pairs(blueprint.get_blueprint_entities() --[[@as [BlueprintEntity] ]]) do
-        local x_map = blueprint_index[blueprint_entity.position.x] or {}
-        assert(not (x_map[blueprint_entity.position.y]))
-        x_map[blueprint_entity.position.y] = idx
-        blueprint_index[blueprint_entity.position.x] = x_map
-    end
-
-    -- all entities here are filter combinators. Find their index in the blueprint
-    -- and assign the config as a tag.
-    for _, main in pairs(entities) do
-        if Is.Valid(main) then
-            local fc_entity = This.fico:entity(main.unit_number)
-            if fc_entity then
-                local idx = (blueprint_index[main.position.x] or {})[main.position.y]
-                if idx then
-                    blueprint.set_blueprint_entity_tag(idx, 'fc_config', fc_entity.config)
-                end
-            end
-        end
-    end
-end
-
-local function has_valid_cursor_stack(player)
-    if not Is.Valid(player) then return false end
-    if not player.cursor_stack then return false end
-
-    return (player.cursor_stack.valid_for_read and player.cursor_stack.name == 'blueprint')
-end
-
-
----@param event EventData.on_player_setup_blueprint
-local function onPlayerSetupBlueprint(event)
-    if not event.area then return end
-
-    local player, player_data = Player.get(event.player_index)
-
-    local entities = player.surface.find_entities_filtered {
-        area = event.area,
-        force = player.force,
-        name = const.filter_combinator_name,
-    }
-    -- nothing in there for us
-    if #entities < 1 then return end
-
-    if has_valid_cursor_stack(player) then
-        save_to_blueprint(entities, player.cursor_stack)
-    else
-        -- Player is editing the blueprint, no access for us yet.
-        -- onPlayerConfiguredBlueprint picks this up and stores it.
-        player_data.fc_blueprint_data = entities
-    end
-end
-
----@param event EventData.on_player_configured_blueprint
-local function onPlayerConfiguredBlueprint(event)
-    local player, player_data = Player.get(event.player_index)
-
-    if player_data.fc_blueprint_data then
-        if has_valid_cursor_stack(player) and player_data.fc_blueprint_data then
-            save_to_blueprint(player_data.fc_blueprint_data, player.cursor_stack)
-        end
-        player_data.fc_blueprint_data = nil
-    end
-end
-
---------------------------------------------------------------------------------
 -- Configuration changes (runtime and startup)
 --------------------------------------------------------------------------------
 
@@ -247,9 +167,8 @@ Event.register(defines.events.on_entity_cloned, onInternalEntityCloned, match_in
 -- Entity settings pasting
 Event.register(defines.events.on_entity_settings_pasted, onEntitySettingsPasted, match_main_entities)
 
--- Blueprint / copy&paste management
-Event.register(defines.events.on_player_setup_blueprint, onPlayerSetupBlueprint)
-Event.register(defines.events.on_player_configured_blueprint, onPlayerConfiguredBlueprint)
+-- Manage blueprint configuration setting
+Framework.blueprint:register_callback(const.filter_combinator_name, This.fico.blueprint_callback)
 
 -- Configuration changes (runtime and startup)
 Event.on_configuration_changed(onConfigurationChanged)

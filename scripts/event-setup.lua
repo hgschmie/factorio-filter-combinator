@@ -12,35 +12,6 @@ local tools = require('framework.tools')
 local const = require('lib.constants')
 
 --------------------------------------------------------------------------------
--- manage ghost building (robot building)
---------------------------------------------------------------------------------
-
----@param event EventData.on_built_entity | EventData.on_robot_built_entity | EventData.script_raised_revive | EventData.script_raised_built
-local function onGhostEntityCreated(event)
-    local entity = event and event.entity
-    script.register_on_object_destroyed(entity)
-
-    -- if an entity ghost was placed, register information to configure
-    -- an entity if it is placed over the ghost
-    ---@type table<integer, ModGhost>
-    local ghosts = storage.ghosts or {}
-
-    ---@class ModGhost
-    ---@field position MapPosition
-    ---@field orientation RealOrientation
-    ---@field tags Tags?
-    ---@field player_index integer
-    ghosts[entity.unit_number] = {
-        position = entity.position,
-        orientation = entity.orientation,
-        tags = entity.tags,
-        player_index = event.player_index
-    }
-
-    storage.ghosts = ghosts
-end
-
---------------------------------------------------------------------------------
 -- entity create / delete
 --------------------------------------------------------------------------------
 
@@ -51,17 +22,10 @@ local function onEntityCreated(event)
     local player_index = event.player_index
     local tags = event.tags
 
-    -- see if this entity replaces a ghost
-    if storage.ghosts then
-        for _, ghost in pairs(storage.ghosts) do
-            if entity.position.x == ghost.position.x
-                and entity.position.y == ghost.position.y
-                and entity.orientation == ghost.orientation then
-                player_index = player_index or ghost.player_index
-                tags = tags or ghost.tags
-                break
-            end
-        end
+    local entity_ghost = Framework.ghost_manager:findMatchingGhost(entity)
+    if entity_ghost then
+        player_index = player_index or entity_ghost.player_index
+        tags = tags or entity_ghost.tags
     end
 
     -- register entity for destruction
@@ -267,7 +231,7 @@ local match_ghost_entities = tools.create_event_ghost_entity_name_matcher(const.
 Event.on_init(function() This.fico:init() end)
 
 -- manage ghost building (robot building)
-tools.event_register(tools.CREATION_EVENTS, onGhostEntityCreated, match_ghost_entities)
+Framework.ghost_manager.register_for_ghost_names(const.main_entity_names)
 
 -- entity create / delete
 tools.event_register(tools.CREATION_EVENTS, onEntityCreated, match_main_entities)

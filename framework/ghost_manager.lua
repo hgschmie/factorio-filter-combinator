@@ -88,7 +88,7 @@ function FrameworkGhostManager.onGhostEntityCreated(event)
 end
 
 ---@param event EventData.on_object_destroyed
-function FrameworkGhostManager.onEntityDestroyed(event)
+function FrameworkGhostManager.onObjectDestroyed(event)
     Framework.ghost_manager:deleteGhost(event.useful_id)
 end
 
@@ -102,6 +102,6 @@ function FrameworkGhostManager.register_for_ghost_attributes(attribute, values)
     tools.event_register(tools.CREATION_EVENTS, Framework.ghost_manager.onGhostEntityCreated, ghost_filter)
 end
 
-Event.register(defines.events.on_object_destroyed, FrameworkGhostManager.onEntityDestroyed)
+Event.register(defines.events.on_object_destroyed, FrameworkGhostManager.onObjectDestroyed)
 
 return FrameworkGhostManager

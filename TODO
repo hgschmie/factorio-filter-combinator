@@ -1,0 +1,3 @@
+- Header line showing connected networks (like other combinators)
+- show active signals at the bottom (like other combinators)
+- factor out all signals into one global combinator, connect with reach ignore.

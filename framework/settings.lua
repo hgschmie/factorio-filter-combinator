@@ -3,7 +3,7 @@
 -- framework settings support -- inspired by flib
 ----------------------------------------------------------------------------------------------------
 
-local table = require('__stdlib2__/stdlib/utils/table')
+local table = require('stdlib.utils.table')
 
 ----------------------------------------------------------------------------------------------------
 
@@ -166,7 +166,7 @@ end
 ----------------------------------------------------------------------------------------------------
 
 if script then
-   local Event = require('__stdlib2__/stdlib/event/event')
+   local Event = require('stdlib.event.event')
 
    -- Runtime settings changed
    Event.register(defines.events.on_runtime_mod_setting_changed, function()

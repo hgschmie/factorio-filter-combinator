@@ -3,8 +3,8 @@
 -- Manage all ghost state for robot building
 ------------------------------------------------------------------------
 
-local Event = require('__stdlib2__/stdlib/event/event')
-local Is = require('__stdlib2__/stdlib/utils/is')
+local Event = require('stdlib.event.event')
+local Is = require('stdlib.utils.is')
 
 local tools = require('framework.tools')
 

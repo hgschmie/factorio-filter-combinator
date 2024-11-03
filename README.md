@@ -56,9 +56,9 @@ exception.
   [raiguard's factorio library](https://mods.factorio.com/mod/flib).
 
 - [Nexela's stdlib](https://mods.factorio.com/mod/stdlib) was a big
-  inspiration for the event driven design. Right now, the mod is using
-  stdlib but I can see lifting the relevant pieces into
-  framework.
+  inspiration for the event driven design. With no official release of
+  stdlib for factorio 2.0 in sight, the relevant pieces are lifted here
+  and patched for 2.0 compatibility.
 
 ## License/copyrights
 
@@ -66,9 +66,10 @@ Full code base:
 
 Copyright (C) 2024 Henning Schmiedehausen, licensed under the [MS-RL](https://opensource.org/licenses/MS-RL) license.
 
-The contents of the framework folder:
+The contents of the framework and the stdlib folder:
 
 Copyright (C) 2024 Henning Schmiedehausen, licensed under the MIT license or the MS-RL license.
+
 
 --------------------------------------------------
 

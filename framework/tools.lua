@@ -3,8 +3,8 @@
 -- Utility functions
 --------------------------------------------------------------------------------
 
-local Is = require('__stdlib2__/stdlib/utils/is')
-local table = require('__stdlib2__/stdlib/utils/table')
+local Is = require('stdlib.utils.is')
+local table = require('stdlib.utils.table')
 
 local lualib_util = require('util')
 
@@ -113,7 +113,7 @@ end
 --------------------------------------------------------------------------------
 
 if script then
-    local Event = require('__stdlib2__/stdlib/event/event')
+    local Event = require('stdlib.event.event')
 
     --- Registers a handler for the given events.
     --- works around https://github.com/Afforess/Factorio-Stdlib/pull/164

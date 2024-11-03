@@ -536,7 +536,7 @@ end
 local function create_internal_entity(cfg)
     local fc_entity = cfg.entity
     local type = cfg.type
-    local comb_visible = cfg.comb_visible
+    local comb_visible = cfg.comb_visible or false
 
 
     -- invisible combinators share position with the main unit

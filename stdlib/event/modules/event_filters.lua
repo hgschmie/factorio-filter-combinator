@@ -15,12 +15,12 @@ function Filters.on_key(event_key, pattern)
 end
 
 function Filters.entity.name(event, pattern)
-    local entity = event and (event.created_entity or event.entity)
+    local entity = event and event.entity
     return entity.name:match(pattern)
 end
 
 function Filters.entity.type(event, pattern)
-    local entity = event and (event.created_entity or event.entity)
+    local entity = event and event.entity
     return entity.type:match(pattern)
 end
 

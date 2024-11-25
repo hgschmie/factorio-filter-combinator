@@ -24,9 +24,6 @@ function This:this_runtime()
     end
 end
 
-Framework.settings:add_startup(require('scripts.settings-startup'))
-Framework.settings:add_player(require('scripts.settings-player'))
-
 ----------------------------------------------------------------------------------------------------
 
 return function(stage)

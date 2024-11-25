@@ -587,7 +587,7 @@ function FiCo:create(main, player_index, tags)
     assert(self:entity(entity_id) == nil)
 
     -- if true, draw all combinators and wires. For debugging
-    local comb_visible = player_index and Framework.settings:player(player_index).comb_visible --[[@as boolean]]
+    local comb_visible = player_index and Framework.settings:runtime_setting('debug_mode') --[[@as boolean]]
 
     -- if tags were passed in and they contain a fc config, use that.
     local config = create_config(tags and tags['fc_config'] --[[@as FilterCombinatorConfig]])
@@ -679,10 +679,11 @@ end
 -- Blueprint
 --------------------------------------------------------------------------------
 
----@param blueprint LuaItemStack
----@param idx integer
 ---@param entity LuaEntity
-function FiCo.blueprint_callback(blueprint, idx, entity)
+---@param idx integer
+---@param blueprint LuaItemStack
+---@param context table<string, any>
+function FiCo.blueprint_callback(entity, idx, blueprint, context)
     if not Is.Valid(entity) then return end
 
     local fico_entity = This.fico:entity(entity.unit_number)

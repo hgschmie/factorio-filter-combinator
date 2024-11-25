@@ -151,7 +151,7 @@ local match_ghost_entities = tools.create_event_ghost_entity_name_matcher(const.
 Event.on_init(function() This.fico:init() end)
 
 -- manage ghost building (robot building)
-Framework.ghost_manager.register_for_ghost_names(const.main_entity_names)
+Framework.ghost_manager:register_for_ghost_names(const.main_entity_names)
 
 -- entity create / delete
 tools.event_register(tools.CREATION_EVENTS, onEntityCreated, match_main_entities)

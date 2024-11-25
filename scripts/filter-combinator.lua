@@ -111,7 +111,7 @@ end
 --- create a list of all filters
 ---@return LogisticFilter[] all_filters
 local function create_all_filters()
-    local prototypes = {
+    local signal_prototypes = {
         item = prototypes['item'],
         fluid = prototypes['fluid'],
         virtual = prototypes['virtual_signal'],
@@ -120,17 +120,28 @@ local function create_all_filters()
     ---@type LogisticFilter[]
     local filters = {}
 
-    for type, prototype in pairs(prototypes) do
-        for sig_name, p in pairs(prototype) do
+    for type, signal_prototype in pairs(signal_prototypes) do
+        for sig_name, p in pairs(signal_prototype) do
             if not (type == 'virtual' and p.special) then -- skip 'special' virtual signals (everything, anything, each, unknown)
-                table.insert(filters, {
+
+                local filter = {
                     value = {
                         type = type,
                         name = sig_name,
-                        quality = 'normal' -- see https://forums.factorio.com/viewtopic.php?t=116334
+                        quality = 'normal',
                     },
                     min = 1
-                })
+                }
+
+                if type == 'item' then
+                    for _, quality in pairs(prototypes.quality) do
+                        local quality_filter = tools.copy(filter)
+                        quality_filter.value.quality = quality.name
+                        table.insert(filters, quality_filter)
+                    end
+                else
+                    table.insert(filters, filter)
+                end
             end
         end
     end

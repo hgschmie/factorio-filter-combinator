@@ -365,21 +365,25 @@ onSelectSignal = function(event)
     local signal = event.element.elem_value --[[@as SignalID]]
     local slot = event.element.tags.idx --[[@as number]]
 
-    for _, filter in pairs(fc_entity.config.filters) do
-        if filter.value.name == signal.name and filter.value.type == signal.type then
-            event.element.elem_value = nil
-            local player = Player.get(event.player_index)
-            local item_name = prototypes[signal.type or 'item'][signal.name].localised_name
-            player.create_local_flying_text { text = { const:locale('signal-selected'), item_name }, create_at_cursor = true }
-            player.play_sound { path = "utility/cannot_build", position = player.position, volume = 1 }
-            return
+    if signal then
+        for _, filter in pairs(fc_entity.config.filters) do
+            if filter.value.name == signal.name and filter.value.type == signal.type and filter.value.quality == signal.quality then
+                event.element.elem_value = nil
+                local player = Player.get(event.player_index)
+                local item_name = prototypes[signal.type or 'item'][signal.name].localised_name
+                player.create_local_flying_text { text = { const:locale('signal-selected'), item_name }, create_at_cursor = true }
+                player.play_sound { path = 'utility/cannot_build', position = player.position, volume = 1 }
+                return
+            end
         end
-    end
 
-    fc_entity.config.filters[slot] = {
-        value = { name = signal.name, type = signal.type, quality = 'normal' },
-        min = 1,
-    }
+        fc_entity.config.filters[slot] = {
+            value = { name = signal.name, type = signal.type, quality = signal.quality or 'normal', comparator = '=', },
+            min = 1,
+        }
+    else
+        fc_entity.config.filters[slot] = nil
+    end
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -408,7 +412,7 @@ local function make_grid_buttons(fc_entity)
                 handler = { [defines.events.on_gui_elem_changed] = onSelectSignal },
             }
             if filters[idx] and filters[idx].value then
-                entry.signal = { name = filters[idx].value.name, type = filters[idx].value.type }
+                entry.signal = { name = filters[idx].value.name, type = filters[idx].value.type, quality = filters[idx].value.quality, }
             end
             has_signals = (entry.signal and true or false) or has_signals
             table.insert(list, entry)

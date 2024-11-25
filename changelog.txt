@@ -3,6 +3,7 @@ Version: 3.0.1
 Date: ????
   Changes:
     - support building on space platforms
+    - support quality for filtering
 ---------------------------------------------------------------------------------------------------
 Version: 3.0.0
 Date: 2024-11-03

@@ -9,4 +9,6 @@ Supports
 - Wire filter mode. Take the signals to be included/excluded from an
   input wire and not from the static filter configuration
 
-- CompactCircuit, Picker Dollies, Nullius. Compatible with Space Exploration.
+- Two tick delay (original version has three tick delay)
+
+- CompactCircuit, Picker Dollies/Even Pickier Dollies. Compatible with Space Exploration.

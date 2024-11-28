@@ -110,21 +110,11 @@ local function get_ui(fc_entity)
                                     },
                                 },
                             },
-                            -- {                    -- Add some spacing
-                            --     type = 'frame',
-                            --     style = 'frame', -- container_invisible_frame_with_title'
-                            -- },
-                            -- {
-                            --     type = 'frame',
-                            --     style = 'frame', -- container_invisible_frame_with_title'
-                            --     children = {
                             {
                                 type = 'label',
                                 style = 'semibold_label', -- heading_3_label'
                                 caption = { 'gui-constant.output' },
                             },
-                            --     },
-                            -- },
                             {
                                 type = 'switch',
                                 name = 'on-off',
@@ -132,21 +122,11 @@ local function get_ui(fc_entity)
                                 left_label_caption = { 'gui-constant.off' },
                                 handler = { [defines.events.on_gui_switch_state_changed] = onSwitchEnabled },
                             },
-                            -- {                    -- Add some spacing
-                            --     type = 'frame',
-                            --     style = 'frame', -- container_invisible_frame_with_title'
-                            -- },
-                            -- {
-                            --     type = 'frame',
-                            --     style = 'frame', -- container_invisible_frame_with_title'
-                            --     children = {
                             {
                                 type = 'label',
                                 style = 'semibold_label', -- heading_3_label'
                                 caption = { const:locale('mode-heading') },
                             },
-                            --     },
-                            -- },
                             {
                                 type = 'switch',
                                 name = 'incl-excl',
@@ -156,10 +136,6 @@ local function get_ui(fc_entity)
                                 left_label_tooltip = { const:locale('mode-include-tooltip') },
                                 handler = { [defines.events.on_gui_switch_state_changed] = onSwitchExclusive },
                             },
-                            -- {                    -- Add some spacing
-                            --     type = 'frame',
-                            --     style = 'frame', -- container_invisible_frame_with_title'
-                            -- },
                             {
                                 type = 'checkbox',
                                 caption = { const:locale('mode-wire') },
@@ -167,10 +143,6 @@ local function get_ui(fc_entity)
                                 handler = { [defines.events.on_gui_checked_state_changed] = onToggleWireMode },
                                 state = false,
                             },
-                            -- {                    -- Add some spacing
-                            --     type = 'frame',
-                            --     style = 'frame', -- container_invisible_frame_with_title'
-                            -- },
                             {
                                 type = 'flow',
                                 direction = 'horizontal',
@@ -197,24 +169,14 @@ local function get_ui(fc_entity)
                                 direction = 'vertical',
                                 name = 'item-grid',
                                 children = {
-                                    -- {                    -- Add some spacing
-                                    --     type = 'frame',
-                                    --     style = 'frame', -- container_invisible_frame_with_title'
-                                    -- },
                                     {
                                         type = 'line',
                                     },
-                                    -- {
-                                    --     type = 'frame',
-                                    --     style = 'frame', -- container_invisible_frame_with_title'
-                                    --     children = {
                                     {
                                         type = 'label',
                                         style = 'semibold_label', -- heading_3_label'
                                         caption = { const:locale('signals-heading') },
                                     },
-                                    --     },
-                                    -- },
                                     {
                                         type = 'scroll-pane',
                                         style = 'logistic_sections_scroll_pane', -- constant_combinator_logistics_scroll_pane

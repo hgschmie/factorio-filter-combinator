@@ -107,21 +107,6 @@ local function onEntitySettingsPasted(event)
 end
 
 --------------------------------------------------------------------------------
--- Configuration changes (runtime and startup)
---------------------------------------------------------------------------------
-
----@param changed ConfigurationChangedData
-local function onConfigurationChanged(changed)
-    if This and This.fico then
-        This.fico:clearAllFilters()
-
-        for _, fc_entity in pairs(This.fico:entities()) do
-            This.fico:refreshFilters(fc_entity)
-        end
-    end
-end
-
---------------------------------------------------------------------------------
 -- Event ticker
 --------------------------------------------------------------------------------
 
@@ -169,10 +154,6 @@ Event.register(defines.events.on_entity_settings_pasted, onEntitySettingsPasted,
 
 -- Manage blueprint configuration setting
 Framework.blueprint:register_callback(const.filter_combinator_name, This.fico.blueprint_callback)
-
--- Configuration changes (runtime and startup)
-Event.on_configuration_changed(onConfigurationChanged)
-Event.register(defines.events.on_runtime_mod_setting_changed, onConfigurationChanged)
 
 -- Event ticker
 Event.on_nth_tick(301, onNthTick)

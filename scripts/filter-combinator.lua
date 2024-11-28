@@ -105,66 +105,8 @@ function FiCo:setEntity(entity_id, fc_entity)
 end
 
 ------------------------------------------------------------------------
--- "all signals" management
+-- filter management
 ------------------------------------------------------------------------
-
---- create a list of all filters
----@return LogisticFilter[] all_filters
-local function create_all_filters()
-    local signal_prototypes = {
-        item = prototypes['item'],
-        fluid = prototypes['fluid'],
-        virtual = prototypes['virtual_signal'],
-    }
-
-    ---@type LogisticFilter[]
-    local filters = {}
-
-    for type, signal_prototype in pairs(signal_prototypes) do
-        for sig_name, p in pairs(signal_prototype) do
-            if not (type == 'virtual' and p.special) then -- skip 'special' virtual signals (everything, anything, each, unknown)
-
-                local filter = {
-                    value = {
-                        type = type,
-                        name = sig_name,
-                        quality = 'normal',
-                    },
-                    min = 1
-                }
-
-                if type == 'item' then
-                    for _, quality in pairs(prototypes.quality) do
-                        local quality_filter = tools.copy(filter)
-                        quality_filter.value.quality = quality.name
-                        table.insert(filters, quality_filter)
-                    end
-                else
-                    table.insert(filters, filter)
-                end
-            end
-        end
-    end
-
-    return filters
-end
-
----@return LogisticFilter[] all_signals
-function FiCo:getAllFilters()
-    if not self.all_signals then
-        if not storage.all_signals then
-            storage.all_signals = create_all_filters()
-        end
-        self.all_signals = storage.all_signals
-    end
-
-    return self.all_signals
-end
-
-function FiCo:clearAllFilters()
-    self.all_signals = nil
-    storage.all_signals = nil
-end
 
 ---@param control LuaConstantCombinatorControlBehavior
 ---@param filters LogisticFilter[]
@@ -192,16 +134,6 @@ local function assign_filters(control, filters)
         until pos <= 1000 -- max number of slots in a single LuaLogisticSection
         section.set_slot(pos, filter)
     end
-end
-
---- Finds the filter section in the ex constant combinator, update all the signals in it to the current all signals count.
----@param fc_entity FilterCombinatorData
-function FiCo:refreshFilters(fc_entity)
-    if not fc_entity then return end
-    local ex_control_behavior = fc_entity.ref.ex.get_or_create_control_behavior() --[[@as LuaConstantCombinatorControlBehavior]]
-    assert(ex_control_behavior)
-
-    assign_filters(ex_control_behavior, self:getAllFilters())
 end
 
 ------------------------------------------------------------------------

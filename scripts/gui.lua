@@ -394,16 +394,14 @@ end
 ---@return FrameworkGuiElemDef[] gui_elements
 local function make_grid_buttons(fc_entity)
     local filters = fc_entity.config.filters
-    local all_filters_count = #(This.fico:getAllFilters())
     local list = {}
 
-    -- round to next 10 signals to make nice lines.
-    local row_count = math.floor(all_filters_count / 10) -- 0 ... floor, not 1 ... ceil
+    local base = 0
 
-    for i = 0, row_count do
+    repeat
         local has_signals = false
         for j = 1, 10 do
-            local idx = i * 10 + j
+            local idx = base + j
             local entry = {
                 type = 'choose-elem-button',
                 tags = { idx = idx },
@@ -413,14 +411,15 @@ local function make_grid_buttons(fc_entity)
             }
             if filters[idx] and filters[idx].value then
                 entry.signal = { name = filters[idx].value.name, type = filters[idx].value.type, quality = filters[idx].value.quality, }
+                has_signals = true
             end
-            has_signals = (entry.signal and true or false) or has_signals
             table.insert(list, entry)
         end
 
+        base = base + 10
         -- exit if there are at least two rows and one is a full row of empty signals
-        if i > 0 and not has_signals then break end
-    end
+    until base > 0 and not has_signals
+
     return list
 end
 

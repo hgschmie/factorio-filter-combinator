@@ -1,7 +1,9 @@
 ---------------------------------------------------------------------------------------------------
-Version: 3.1.1
-Date: ????
+Version: 3.2.0
+Date: 2024-11-28
   Changes:
+    - remove "all signals" logic that led to startup delays in 3.1.0
+    - rework internal filter logic, make it much simpler and reduce delay from 3 to 2 ticks
 ---------------------------------------------------------------------------------------------------
 Version: 3.1.0
 Date: 2024-11-25

@@ -11,9 +11,8 @@
     "base >= 2.0.0",
     "?PickerDollies",
     "?even-pickier-dollies",
-    "?nullius",
     "?compaktcircuit",
-    "?space-exploration"
+    "(?)space-exploration"
   ],
   "package": {
     "git_publish_branch": "main",

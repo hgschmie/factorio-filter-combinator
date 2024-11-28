@@ -17,7 +17,6 @@ It supports
 
 - [CompactCircuit](https://mods.factorio.com/mod/compaktcircuit) (filter combinators can be used in compact circuits)
 - [Picker Dollies](https://mods.factorio.com/mod/PickerDollies) (filter combinators can be moved and rotated)
-- [Nullius](https://mods.factorio.com/mod/nullius) support has been taken from the original filter combinator but not tested
 
 ## Functional support
 

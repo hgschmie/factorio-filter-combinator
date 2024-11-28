@@ -9,7 +9,6 @@
 local This = {
     other_mods = {
         framework = 'framework',
-        nullius = 'nullius',
         compaktcircuit = 'compaktcircuit',
         PickerDollies = 'PickerDollies',
         ['even-pickier-dollies'] = 'PickerDollies',

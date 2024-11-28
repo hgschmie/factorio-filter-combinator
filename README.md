@@ -24,7 +24,7 @@ It supports
 - Settings copy/paste
 - Entity copy/paste and blueprint support
 - Entity cloning (should be compatible with Space Exploration)
-- Three ticks of delay between input and output (similar to original filter combinator)
+- Two ticks of delay between input and output (The original filter combinator has a three tick delay)
 
 This mod started out as a collection of patches/changes to the
 original filter-combinator but I started to make large scale changes

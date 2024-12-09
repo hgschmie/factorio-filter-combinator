@@ -328,11 +328,13 @@ onSelectSignal = function(event)
     local slot = event.element.tags.idx --[[@as number]]
 
     if signal then
+        local quality = signal.quality or 'normal'
+        local type = signal.type or 'item'
         for _, filter in pairs(fc_entity.config.filters) do
-            if filter.value.name == signal.name and filter.value.type == signal.type and filter.value.quality == signal.quality then
+            if filter.value.name == signal.name and filter.value.type == type and filter.value.quality == quality then
                 event.element.elem_value = nil
                 local player = Player.get(event.player_index)
-                local item_name = prototypes[signal.type or 'item'][signal.name].localised_name
+                local item_name = prototypes[type == 'virtual' and 'virtual_signal' or type][signal.name].localised_name
                 player.create_local_flying_text { text = { const:locale('signal-selected'), item_name }, create_at_cursor = true }
                 player.play_sound { path = 'utility/cannot_build', position = player.position, volume = 1 }
                 return
@@ -340,7 +342,7 @@ onSelectSignal = function(event)
         end
 
         fc_entity.config.filters[slot] = {
-            value = { name = signal.name, type = signal.type, quality = signal.quality or 'normal', comparator = '=', },
+            value = { name = signal.name, type = type, quality = quality, comparator = '=', },
             min = 1,
         }
     else

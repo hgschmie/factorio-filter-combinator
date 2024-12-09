@@ -1,9 +1,9 @@
 ---------------------------------------------------------------------------------------------------
 Version: 3.2.1
 Date: ????
-  Changes:
+  Bugfixes:
     - fix problem with internal signals that leeds to "bleeding" of signals between filter combinators
-
+    - fix broken duplicate detection for signal selection in the GUI (fixes problem reported by @sh4dow on the forum)
 ---------------------------------------------------------------------------------------------------
 Version: 3.2.0
 Date: 2024-11-28

@@ -116,23 +116,35 @@ local function assign_filters(control, filters)
         control.remove_section(i)
     end
 
-    ---@type LuaLogisticSection?
-    local section
     ---@type integer
-    local idx = -1
+    local idx = 0
+
+    ---@type table<string, table<string, table<string, number>>>
+    local cache = {}
 
     for i, filter in pairs(filters) do
-        local pos
-        repeat
-            pos = i - idx * 1000
-            if pos > 1000 then section = nil end
-            if not section then
-                section = control.add_section()
-                idx = idx + 1
-            end
+        local signal = filter.value --[[@as SignalFilter]]
+        local type = signal.type or 'item'
+        cache[type] = cache[type] or {}
+        cache[type][signal.name] = cache[type][signal.name] or {}
+
+        local index = cache[type][signal.name][signal.quality]
+        if not index then
+            index = idx
+            cache[type][signal.name][signal.quality] = index
+            idx = idx + 1
+            local section = control.sections[math.floor(index / 1000) + 1] or control.add_section()
+
+            local pos = index % 1000 + 1
+            section.set_slot(pos, filter)
+        else
+            local section = control.sections[math.floor(index / 1000) + 1]
             assert(section)
-        until pos <= 1000 -- max number of slots in a single LuaLogisticSection
-        section.set_slot(pos, filter)
+
+            local pos = index % 1000 + 1
+            filter.min = filter.min + section.filters[pos].min
+            section.set_slot(pos, filter)
+        end
     end
 end
 

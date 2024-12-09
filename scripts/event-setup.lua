@@ -107,6 +107,33 @@ local function onEntitySettingsPasted(event)
 end
 
 --------------------------------------------------------------------------------
+-- Configuration changes (runtime and startup)
+--------------------------------------------------------------------------------
+
+---@param changed ConfigurationChangedData?
+local function onConfigurationChanged(changed)
+    This.fico:init()
+
+    -- enable filter combinator if circuit network is researched.
+    for _, force in pairs(game.forces) do
+        if force.recipes[const.filter_combinator_name] and force.technologies['circuit-network'] then
+            force.recipes[const.filter_combinator_name].enabled = force.technologies['circuit-network'].researched
+        end
+    end
+
+    for _, fc_entity in pairs(This.fico:entities()) do
+        if fc_entity.ref.signals then
+            local control_behavior = fc_entity.ref.signals.get_or_create_control_behavior() --[[ @as LuaConstantCombinatorControlBehavior ]]
+            if control_behavior then
+                for i = 1, control_behavior.sections_count, 1 do
+                    control_behavior.sections[i].group = ''
+                end
+            end
+        end
+    end
+end
+
+--------------------------------------------------------------------------------
 -- Event ticker
 --------------------------------------------------------------------------------
 
@@ -154,6 +181,11 @@ Event.register(defines.events.on_entity_settings_pasted, onEntitySettingsPasted,
 
 -- Manage blueprint configuration setting
 Framework.blueprint:register_callback(const.filter_combinator_name, This.fico.blueprint_callback)
+
+-- config change events
+-- Configuration changes (runtime and startup)
+Event.on_configuration_changed(onConfigurationChanged)
+Event.register(defines.events.on_runtime_mod_setting_changed, onConfigurationChanged)
 
 -- Event ticker
 Event.on_nth_tick(301, onNthTick)

@@ -2,6 +2,8 @@
 Version: 3.2.1
 Date: ????
   Changes:
+    - fix problem with internal signals that leeds to "bleeding" of signals between filter combinators
+
 ---------------------------------------------------------------------------------------------------
 Version: 3.2.0
 Date: 2024-11-28

@@ -1,3 +1,4 @@
+---@meta
 ------------------------------------------------------------------------
 -- Filter combinator main code
 ------------------------------------------------------------------------
@@ -127,7 +128,6 @@ local function assign_filters(control, filters)
             if pos > 1000 then section = nil end
             if not section then
                 section = control.add_section()
-                section.group = 'settings'
                 idx = idx + 1
             end
             assert(section)

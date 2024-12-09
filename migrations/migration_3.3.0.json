@@ -1,0 +1,18 @@
+{
+    "item": [
+        [ "hps:fc-filter-combinator", "hps__fc-filter-combinator" ]
+    ],
+    "recipe": [
+        [ "hps:fc-filter-combinator", "hps__fc-filter-combinator" ]
+    ],
+    "entity": [
+        [ "hps:fc-filter-combinator", "hps__fc-filter-combinator" ],
+        [ "hps:fc-filter-combinator-packed", "hps__fc-filter-combinator-packed" ],
+        [ "hps:fc-filter-combinator-ac", "hps__fc-filter-combinator-ac" ],
+        [ "hps:fc-filter-combinator-dc", "hps__fc-filter-combinator-dc" ],
+        [ "hps:fc-filter-combinator-cc", "hps__fc-filter-combinator-cc" ],
+        [ "hps:fc-filter-combinator-debug-ac", "hps__fc-filter-combinator-debug-ac" ],
+        [ "hps:fc-filter-combinator-debug-cc", "hps__fc-filter-combinator-debug-dc" ],
+        [ "hps:fc-filter-combinator-debug-dc", "hps__fc-filter-combinator-debug-cc" ]
+    ]
+}

@@ -10,6 +10,8 @@ local tools = require('framework.tools')
 
 local const = require('lib.constants')
 
+local Gui = require('scripts.gui')
+
 --------------------------------------------------------------------------------
 -- entity create / delete
 --------------------------------------------------------------------------------
@@ -37,7 +39,10 @@ end
 local function onEntityDeleted(event)
     local entity = event and event.entity
 
-    This.fico:destroy(entity.unit_number)
+    local unit_number = entity.unit_number
+
+    This.fico:destroy(unit_number)
+    Gui.closeByEntity(unit_number)
 end
 
 --------------------------------------------------------------------------------
@@ -58,6 +63,7 @@ local function onObjectDestroyed(event)
 
     -- main entity destroyed
     This.fico:destroy(event.useful_id)
+    Gui.closeByEntity(event.useful_id)
 end
 
 --------------------------------------------------------------------------------

@@ -3,6 +3,7 @@ Version: 3.3.0
 Date: ????
   Changes:
     - Support migration from old 1.1 saves (migrate old entities to new entities)
+    - Rework GUI, show wire connections for input and output
 ---------------------------------------------------------------------------------------------------
 Version: 3.2.1
 Date: 2024-12-09

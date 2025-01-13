@@ -51,13 +51,7 @@ end
 
 ---@param event EventData.on_object_destroyed
 local function onObjectDestroyed(event)
-    -- is it a ghost?
-    if storage.ghosts and storage.ghosts[event.useful_id] then
-        storage.ghosts[event.useful_id] = nil
-        return
-    end
-
-    -- or a main entity?
+    -- is it a main entity?
     local fc_entity = This.fico:entity(event.useful_id)
     if not fc_entity then return end
 

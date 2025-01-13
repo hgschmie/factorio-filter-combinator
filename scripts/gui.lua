@@ -2,6 +2,7 @@
 ------------------------------------------------------------------------
 -- Filter combinator GUI
 ------------------------------------------------------------------------
+assert(script)
 
 local Event = require('stdlib.event.event')
 local Player = require('stdlib.event.player')
@@ -19,7 +20,7 @@ local Gui = {}
 ----------------------------------------------------------------------------------------------------
 
 ---@param fc_entity FilterCombinatorData
----@return FrameworkGuiElemDef ui
+---@return framework.gui.element_definition ui
 function Gui.get_ui(fc_entity)
     return {
         type = 'frame',
@@ -263,53 +264,19 @@ end
 ---@param event EventData.on_gui_switch_state_changed|EventData.on_gui_checked_state_changed|EventData.on_gui_elem_changed
 ---@return FilterCombinatorData? fc_entity
 local function locate_config(event)
-    local _, player_data = Player.get(event.player_index)
-    if not (player_data and player_data.fc_gui) then return nil end
+    local gui = Framework.gui_manager:find_gui(event.player_index)
+    if not gui then return end
 
-    local fc_entity = This.fico:entity(player_data.fc_gui.fc_id)
-    if not fc_entity then return nil end
-
-    return fc_entity
+    return This.fico:entity(gui.entity_id)
 end
 
 ----------------------------------------------------------------------------------------------------
 -- close the UI (button or shortcut key)
 ----------------------------------------------------------------------------------------------------
 
----@param player_index integer?
-function Gui.closeByPlayer(player_index)
-    if not player_index then return end
-
-    local player, player_data = Player.get(player_index)
-    if not player then return end
-
-    local gui = player_data.fc_gui
-
-    if (not gui) then return end
-
-    Event.remove(-1, Gui.gui_updater, nil, gui)
-    player_data.fc_gui = nil
-    Framework.gui_manager:destroy_gui(gui.gui)
-end
-
----@param unit_number integer?
-function Gui.closeByEntity(unit_number)
-    if not unit_number then return end
-
-    for _, player in pairs(game.players) do
-        if player.opened then
-            local player_data = Player.pdata(player.index)
-            if player_data and player_data.fc_gui and player_data.fc_gui.fc_id == unit_number then
-                Gui.closeByPlayer(player.index)
-            end
-        end
-    end
-end
-
----
 ---@param event EventData.on_gui_click|EventData.on_gui_opened
 function Gui.onWindowClosed(event)
-    Gui.closeByPlayer(event.player_index)
+    Framework.gui_manager:destroy_gui(event.player_index)
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -422,7 +389,7 @@ end
 ----------------------------------------------------------------------------------------------------
 
 ---@param fc_entity FilterCombinatorData
----@return FrameworkGuiElemDef[] gui_elements
+---@return framework.gui.element_definition[] gui_elements
 local function make_grid_buttons(fc_entity)
     local filters = fc_entity.config.filters
     local list = {}
@@ -458,7 +425,7 @@ end
 -- GUI state updater
 ----------------------------------------------------------------------------------------------------
 
----@param gui FrameworkGui
+---@param gui framework.gui
 ---@param fc_entity FilterCombinatorData
 function Gui.update_config_gui_state(gui, fc_entity)
     local fc_config = fc_entity.config
@@ -500,7 +467,7 @@ function Gui.update_config_gui_state(gui, fc_entity)
     gui:replace_children('signals', slot_buttons)
 end
 
----@param gui FrameworkGui
+---@param gui framework.gui
 ---@param fc_entity FilterCombinatorData
 local function update_gui_state(gui, fc_entity)
     for _, pin in pairs { 'input', 'output' } do
@@ -535,24 +502,27 @@ end
 -- Event ticker
 ----------------------------------------------------------------------------------------------------
 
----@param fc_gui FilterCombinatorGui
-function Gui.gui_updater(ev, fc_gui)
-    local fc_entity = This.fico:entity(fc_gui.fc_id) --[[@as FilterCombinatorData ]]
-    if not fc_entity then
-        Event.remove(-1, Gui.gui_updater, nil, fc_gui)
-        return
-    end
+---@param gui framework.gui
+---@return boolean
+function Gui.guiUpdater(gui)
+    local fc_entity = This.fico:entity(gui.entity_id) --[[@as FilterCombinatorData ]]
+    if not fc_entity then return false end
+
+    ---@type filter_combinator.GuiContext
+    local context = gui.context
 
     This.fico:tick(fc_entity)
 
-    if not (fc_gui.last_config and table.compare(fc_gui.last_config, fc_entity.config)) then
+    if not (context.last_config and table.compare(context.last_config, fc_entity.config)) then
         This.fico:reconfigure(fc_entity)
-        Gui.update_config_gui_state(fc_gui.gui, fc_entity)
-        fc_gui.last_config = tools.copy(fc_entity.config)
+        Gui.update_config_gui_state(gui, fc_entity)
+        context.last_config = tools.copy(fc_entity.config)
     end
 
     -- always update wire state
-    update_gui_state(fc_gui.gui, fc_entity)
+    update_gui_state(gui, fc_entity)
+
+    return true
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -561,15 +531,21 @@ end
 
 ---@param event EventData.on_gui_opened
 function Gui.onGuiOpened(event)
-    local player, player_data = Player.get(event.player_index)
-    if not (player and player_data) then return end
+    local player = Player.get(event.player_index)
+    if not player then return end
 
     -- close an eventually open gui
-    Gui.closeByPlayer(event.player_index)
+    Framework.gui_manager:destroy_gui(event.player_index)
 
     local entity = event and event.entity --[[@as LuaEntity]]
-    local fc_id = entity.unit_number --[[@as integer]]
-    local fc_entity = This.fico:entity(fc_id) --[[@as FilterCombinatorData ]]
+    if not entity then
+        player.opened = nil
+        return
+    end
+
+    assert(entity.unit_number)
+
+    local fc_entity = This.fico:entity(entity.unit_number) --[[@as FilterCombinatorData ]]
 
     if not fc_entity then
         log('Data missing for ' ..
@@ -578,26 +554,27 @@ function Gui.onGuiOpened(event)
         return
     end
 
-    local gui = Framework.gui_manager:create_gui(player.gui.screen, Gui.get_ui(fc_entity))
-
-    ---@class FilterCombinatorGui
-    ---@field gui FrameworkGui
-    ---@field fc_id integer
+    ---@class filter_combinator.GuiContext
     ---@field last_config FilterCombinatorConfig?
-    player_data.fc_gui = {
-        gui = gui,
-        fc_id = fc_id,
+    local gui_context = {
         last_config = nil,
     }
 
-    Event.register(-1, Gui.gui_updater, nil, player_data.fc_gui)
+    local gui = Framework.gui_manager:create_gui {
+        player_index = event.player_index,
+        parent = player.gui.screen,
+        ui_tree = Gui.get_ui(fc_entity),
+        context = gui_context,
+        update_callback = Gui.guiUpdater,
+        entity_id = entity.unit_number,
+    }
 
     player.opened = gui.root
 end
 
 function Gui.onGhostGuiOpened(event)
-    local player, player_data = Player.get(event.player_index)
-    if not (player and player_data) then return end
+    local player = Player.get(event.player_index)
+    if not player then return end
 
     player.opened = nil
 end
@@ -606,10 +583,15 @@ end
 -- Event registration
 ----------------------------------------------------------------------------------------------------
 
-local match_main_entities = tools.create_event_entity_matcher('name', const.main_entity_names)
-local match_ghost_main_entities = tools.create_event_ghost_entity_matcher('ghost_name', const.main_entity_names)
+local function register_events()
+    local match_main_entities = tools.create_event_entity_matcher('name', const.main_entity_names)
+    local match_ghost_main_entities = tools.create_event_ghost_entity_matcher('ghost_name', const.main_entity_names)
 
-Event.on_event(defines.events.on_gui_opened, Gui.onGuiOpened, match_main_entities)
-Event.on_event(defines.events.on_gui_opened, Gui.onGhostGuiOpened, match_ghost_main_entities)
+    Event.on_event(defines.events.on_gui_opened, Gui.onGuiOpened, match_main_entities)
+    Event.on_event(defines.events.on_gui_opened, Gui.onGhostGuiOpened, match_ghost_main_entities)
+end
+
+Event.on_init(register_events)
+Event.on_load(register_events)
 
 return Gui

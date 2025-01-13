@@ -2,7 +2,7 @@
 --- Initialize this mod's globals
 ----------------------------------------------------------------------------------------------------
 
----@class FicoModThis
+---@class FilterCombinatorMod
 ---@field other_mods table<string, string>
 ---@field fico FilterCombinator
 ---@field gui ModGui?
@@ -13,22 +13,11 @@ local This = {
         PickerDollies = 'PickerDollies',
         ['even-pickier-dollies'] = 'PickerDollies',
     },
-    fico = require('scripts.filter-combinator'),
-    gui = nil,
 }
 
-function This:this_runtime()
-    if script then
-        This.gui = This.gui or require('scripts.gui') --[[@as ModGui ]]
-    end
+if script then
+    This.fico = require('scripts.filter-combinator')
+    This.gui = require('scripts.gui') --[[@as ModGui ]]
 end
 
-----------------------------------------------------------------------------------------------------
-
-return function(stage)
-    if This['this_' .. stage] then
-        This['this_' .. stage](This)
-    end
-
-    return This
-end
+return This

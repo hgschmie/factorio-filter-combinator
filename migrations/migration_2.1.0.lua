@@ -1,4 +1,4 @@
-require('lib.init')('runtime')
+require('lib.init')
 local const = require('lib.constants')
 
 ------------------------------------------------------------------------

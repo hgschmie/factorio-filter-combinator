@@ -2,7 +2,7 @@
 -- runtime code
 ------------------------------------------------------------------------
 
-require('lib.init')('runtime')
+require('lib.init')
 
 -- setup player management
 require('stdlib.event.player').register_events(true)
@@ -13,5 +13,4 @@ require('scripts.event-setup')
 -- setup remote interface
 require('scripts.remote')
 
--- other mods code
-require('framework.other-mods').runtime()
+Framework.post_runtime_stage()

@@ -1,4 +1,4 @@
-require('lib.init')('runtime')
+require('lib.init')
 local const = require('lib.constants')
 
 if storage.fc_data and storage.fc_data.VERSION >= const.current_version then return end

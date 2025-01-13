@@ -2,7 +2,7 @@
 -- data phase 1
 ------------------------------------------------------------------------
 
-require('lib.init')('data')
+require('lib.init')
 
 local const = require('lib.constants')
 
@@ -32,4 +32,4 @@ data:extend { item, recipe }
 table.insert(data.raw['technology']['circuit-network'].effects, { type = 'unlock-recipe', recipe = const.filter_combinator_name })
 
 ------------------------------------------------------------------------
-require('framework.other-mods').data()
+Framework.post_data_stage()

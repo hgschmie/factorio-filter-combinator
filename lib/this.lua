@@ -5,10 +5,9 @@
 ---@class FilterCombinatorMod
 ---@field other_mods table<string, string>
 ---@field fico FilterCombinator
----@field gui ModGui?
-local This = {
+---@field gui FilterCombinatorGui?
+This = {
     other_mods = {
-        framework = 'framework',
         compaktcircuit = 'compaktcircuit',
         PickerDollies = 'PickerDollies',
         ['even-pickier-dollies'] = 'PickerDollies',
@@ -17,7 +16,10 @@ local This = {
 
 if script then
     This.fico = require('scripts.filter-combinator')
-    This.gui = require('scripts.gui') --[[@as ModGui ]]
+    This.gui = require('scripts.gui') --[[@as FilterCombinatorGui ]]
+
+    -- setup remote interface
+    require('scripts.remote')
 end
 
 return This

@@ -1,6 +1,7 @@
 --------------------------------------------------------------------------------
 -- event setup for the mod
 --------------------------------------------------------------------------------
+assert(script)
 
 local Event = require('stdlib.event.event')
 local Is = require('stdlib.utils.is')
@@ -187,6 +188,9 @@ local function register_events()
     Event.on_nth_tick(301, onNthTick)
 end
 
+--------------------------------------------------------------------------------
+-- mod init/load code
+--------------------------------------------------------------------------------
 local function on_init()
     This.fico:init()
     register_events()
@@ -195,6 +199,9 @@ end
 local function on_load()
     register_events()
 end
+
+-- setup player management
+Player.register_events(true)
 
 -- mod init code
 Event.on_init(on_init)

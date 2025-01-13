@@ -2,6 +2,7 @@
 ------------------------------------------------------------------------
 -- Filter combinator main code
 ------------------------------------------------------------------------
+assert(script)
 
 local Is = require('stdlib.utils.is')
 local table = require('stdlib.utils.table')

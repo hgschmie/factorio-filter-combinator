@@ -38,8 +38,8 @@ end
 ---@param event EventData.on_player_mined_entity | EventData.on_robot_mined_entity | EventData.on_entity_died | EventData.script_raised_destroy
 local function onEntityDeleted(event)
     local entity = event and event.entity
-
     local unit_number = entity.unit_number
+    if not unit_number then return end
 
     This.fico:destroy(unit_number)
     Gui.closeByEntity(unit_number)
@@ -137,12 +137,11 @@ end
 -- Event ticker
 --------------------------------------------------------------------------------
 
----@param event NthTickEventData
-local function onNthTick(event)
+local function onNthTick()
     if This.fico:totalCount() <= 0 then return end
 
     for main_unit_number, fc_entity in pairs(This.fico:entities()) do
-        if not Is.Valid(fc_entity.main) then
+        if not (fc_entity.main and fc_entity.main.valid) then
             -- most likely cc has removed the main entity
             This.fico:destroy(main_unit_number)
         else
@@ -155,37 +154,48 @@ end
 -- event registration
 --------------------------------------------------------------------------------
 
-local match_main_entities = tools.create_event_entity_matcher('name', const.main_entity_names)
-local match_internal_entities = tools.create_event_entity_matcher('name', const.internal_entity_names)
-local match_ghost_entities = tools.create_event_ghost_entity_name_matcher(const.main_entity_names)
+local function register_events()
+    local match_main_entities = tools.create_event_entity_matcher('name', const.main_entity_names)
+    local match_internal_entities = tools.create_event_entity_matcher('name', const.internal_entity_names)
+
+    -- manage ghost building (robot building)
+    Framework.ghost_manager:register_for_ghost_names(const.main_entity_names)
+
+    -- entity create / delete
+    tools.event_register(tools.CREATION_EVENTS, onEntityCreated, match_main_entities)
+    tools.event_register(tools.DELETION_EVENTS, onEntityDeleted, match_main_entities)
+
+    -- entity destroy
+    Event.register(defines.events.on_object_destroyed, onObjectDestroyed)
+
+    -- Entity cloning
+    Event.register(defines.events.on_entity_cloned, onMainEntityCloned, match_main_entities)
+    Event.register(defines.events.on_entity_cloned, onInternalEntityCloned, match_internal_entities)
+
+    -- Entity settings pasting
+    Event.register(defines.events.on_entity_settings_pasted, onEntitySettingsPasted, match_main_entities)
+
+    -- Manage blueprint configuration setting
+    Framework.blueprint:register_callback(const.filter_combinator_name, This.fico.blueprint_callback)
+
+    -- config change events
+    -- Configuration changes (runtime and startup)
+    Event.on_configuration_changed(onConfigurationChanged)
+    Event.register(defines.events.on_runtime_mod_setting_changed, onConfigurationChanged)
+
+    -- Event ticker
+    Event.on_nth_tick(301, onNthTick)
+end
+
+local function on_init()
+    This.fico:init()
+    register_events()
+end
+
+local function on_load()
+    register_events()
+end
 
 -- mod init code
-Event.on_init(function() This.fico:init() end)
-
--- manage ghost building (robot building)
-Framework.ghost_manager:register_for_ghost_names(const.main_entity_names)
-
--- entity create / delete
-tools.event_register(tools.CREATION_EVENTS, onEntityCreated, match_main_entities)
-tools.event_register(tools.DELETION_EVENTS, onEntityDeleted, match_main_entities)
-
--- entity destroy
-Event.register(defines.events.on_object_destroyed, onObjectDestroyed)
-
--- Entity cloning
-Event.register(defines.events.on_entity_cloned, onMainEntityCloned, match_main_entities)
-Event.register(defines.events.on_entity_cloned, onInternalEntityCloned, match_internal_entities)
-
--- Entity settings pasting
-Event.register(defines.events.on_entity_settings_pasted, onEntitySettingsPasted, match_main_entities)
-
--- Manage blueprint configuration setting
-Framework.blueprint:register_callback(const.filter_combinator_name, This.fico.blueprint_callback)
-
--- config change events
--- Configuration changes (runtime and startup)
-Event.on_configuration_changed(onConfigurationChanged)
-Event.register(defines.events.on_runtime_mod_setting_changed, onConfigurationChanged)
-
--- Event ticker
-Event.on_nth_tick(301, onNthTick)
+Event.on_init(on_init)
+Event.on_load(on_load)

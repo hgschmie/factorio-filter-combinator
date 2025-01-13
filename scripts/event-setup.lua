@@ -38,12 +38,12 @@ end
 
 ---@param event EventData.on_player_mined_entity | EventData.on_robot_mined_entity | EventData.on_entity_died | EventData.script_raised_destroy
 local function onEntityDeleted(event)
-    local entity = event and event.entity
-    local unit_number = entity.unit_number
-    if not unit_number then return end
+    local entity = event.entity
+    if not (entity and entity.valid) then return end
+    assert(entity.unit_number)
 
-    This.fico:destroy(unit_number)
-    Gui.closeByEntity(unit_number)
+    This.fico:destroy(entity.unit_number)
+    Framework.gui_manager:destroy_gui_by_entity_id(entity.unit_number)
 end
 
 --------------------------------------------------------------------------------
@@ -52,13 +52,9 @@ end
 
 ---@param event EventData.on_object_destroyed
 local function onObjectDestroyed(event)
-    -- is it a main entity?
-    local fc_entity = This.fico:entity(event.useful_id)
-    if not fc_entity then return end
-
     -- main entity destroyed
     This.fico:destroy(event.useful_id)
-    Gui.closeByEntity(event.useful_id)
+    Framework.gui_manager:destroy_gui_by_entity_id(event.useful_id)
 end
 
 --------------------------------------------------------------------------------

@@ -19,14 +19,38 @@ local Gui = {}
 -- UI definition
 ----------------------------------------------------------------------------------------------------
 
----@param fc_entity FilterCombinatorData
+--- Provides all the events used by the GUI and their mappings to functions. This must be outside the
+--- GUI definition as it can not be serialized into storage.
+---@return framework.gui_manager.event_definition
+local function get_gui_event_definition()
+    return {
+        events = {
+            onWindowClosed = Gui.onWindowClosed,
+            onSwitchEnabled = Gui.onSwitchEnabled,
+            onSwitchExclusive = Gui.onSwitchExclusive,
+            onSwitchGreenWire = Gui.onSwitchGreenWire,
+            onSwitchRedWire = Gui.onSwitchRedWire,
+            onToggleWireMode = Gui.onToggleWireMode,
+            onSelectSignal = Gui.onSelectSignal,
+        },
+        callback = Gui.guiUpdater,
+    }
+end
+
+--- Returns the definition of the GUI. All events must be mapped onto constants from the gui_events array.
+---@param gui framework.gui
 ---@return framework.gui.element_definition ui
-function Gui.get_ui(fc_entity)
+function Gui.getUi(gui)
+    local gui_events = gui.gui_events
+
+    local fc_entity = This.fico:entity(gui.entity_id)
+    assert(fc_entity)
+
     return {
         type = 'frame',
         name = 'gui_root',
         direction = 'vertical',
-        handler = { [defines.events.on_gui_closed] = Gui.onWindowClosed },
+        handler = { [defines.events.on_gui_closed] = gui_events.onWindowClosed },
         elem_mods = { auto_center = true },
         children = {
             { -- Title Bar
@@ -53,7 +77,7 @@ function Gui.get_ui(fc_entity)
                         hovered_sprite = 'utility/close_black',
                         clicked_sprite = 'utility/close_black',
                         mouse_button_filter = { 'left' },
-                        handler = { [defines.events.on_gui_click] = Gui.onWindowClosed },
+                        handler = { [defines.events.on_gui_click] = gui_events.onWindowClosed },
                     },
                 },
             }, -- Title Bar End
@@ -74,12 +98,12 @@ function Gui.get_ui(fc_entity)
                                 children = {
                                     {
                                         type = 'label',
-                                        style = 'semibold_label',
-                                        caption = { const:locale('input') },
+                                        style = 'subheader_caption_label',
+                                        caption = { '', { 'gui-arithmetic.input' }, { 'colon' } },
                                     },
                                     {
                                         type = 'label',
-                                        style = 'subheader_label',
+                                        style = 'label',
                                         name = 'connections_input',
                                     },
                                     {
@@ -100,12 +124,12 @@ function Gui.get_ui(fc_entity)
                                     },
                                     {
                                         type = 'label',
-                                        style = 'semibold_label',
-                                        caption = { const:locale('output') },
+                                        style = 'subheader_caption_label',
+                                        caption = { '', { 'gui-arithmetic.output' }, { 'colon' } },
                                     },
                                     {
                                         type = 'label',
-                                        style = 'subheader_label',
+                                        style = 'label',
                                         name = 'connections_output',
                                     },
                                     {
@@ -128,13 +152,13 @@ function Gui.get_ui(fc_entity)
                                 children = {
                                     {
                                         type = 'sprite',
-                                        name = 'lamp',
+                                        name = 'status-lamp',
                                         style = 'framework_indicator',
                                     },
                                     {
                                         type = 'label',
                                         style = 'label',
-                                        name = 'status',
+                                        name = 'status-label',
                                     },
                                     {
                                         type = 'empty-widget',
@@ -170,7 +194,7 @@ function Gui.get_ui(fc_entity)
                                 name = 'on-off',
                                 right_label_caption = { 'gui-constant.on' },
                                 left_label_caption = { 'gui-constant.off' },
-                                handler = { [defines.events.on_gui_switch_state_changed] = Gui.onSwitchEnabled },
+                                handler = { [defines.events.on_gui_switch_state_changed] = gui_events.onSwitchEnabled },
                             },
                             {
                                 type = 'label',
@@ -184,13 +208,13 @@ function Gui.get_ui(fc_entity)
                                 right_label_tooltip = { const:locale('mode-exclude-tooltip') },
                                 left_label_caption = { const:locale('mode-include') },
                                 left_label_tooltip = { const:locale('mode-include-tooltip') },
-                                handler = { [defines.events.on_gui_switch_state_changed] = Gui.onSwitchExclusive },
+                                handler = { [defines.events.on_gui_switch_state_changed] = gui_events.onSwitchExclusive },
                             },
                             {
                                 type = 'checkbox',
                                 caption = { const:locale('mode-wire') },
                                 name = 'mode-wire',
-                                handler = { [defines.events.on_gui_checked_state_changed] = Gui.onToggleWireMode },
+                                handler = { [defines.events.on_gui_checked_state_changed] = gui_events.onToggleWireMode },
                                 state = false,
                             },
                             {
@@ -205,14 +229,14 @@ function Gui.get_ui(fc_entity)
                                         type = 'radiobutton',
                                         caption = { 'item-name.red-wire' },
                                         name = 'red-wire-indicator',
-                                        handler = { [defines.events.on_gui_checked_state_changed] = Gui.onSwitchRedWire },
+                                        handler = { [defines.events.on_gui_checked_state_changed] = gui_events.onSwitchRedWire },
                                         state = false,
                                     },
                                     {
                                         type = 'radiobutton',
                                         caption = { 'item-name.green-wire' },
                                         name = 'green-wire-indicator',
-                                        handler = { [defines.events.on_gui_checked_state_changed] = Gui.onSwitchGreenWire },
+                                        handler = { [defines.events.on_gui_checked_state_changed] = gui_events.onSwitchGreenWire },
                                         state = false,
                                     },
                                 },
@@ -252,20 +276,12 @@ end
 -- UI Callbacks
 ----------------------------------------------------------------------------------------------------
 
----@param event EventData.on_gui_switch_state_changed|EventData.on_gui_checked_state_changed|EventData.on_gui_elem_changed
----@return FilterCombinatorData? fc_entity
-local function locate_config(event)
-    local gui = Framework.gui_manager:find_gui(event.player_index)
-    if not gui then return end
-
-    return This.fico:entity(gui.entity_id)
-end
-
 ----------------------------------------------------------------------------------------------------
 -- close the UI (button or shortcut key)
 ----------------------------------------------------------------------------------------------------
 
----@param event EventData.on_gui_click|EventData.on_gui_opened
+--- close the UI (button or shortcut key)
+---@param event EventData.on_gui_click|EventData.on_gui_closed
 function Gui.onWindowClosed(event)
     Framework.gui_manager:destroy_gui(event.player_index)
 end
@@ -282,8 +298,9 @@ local values_on_off = table.invert(on_off_values)
 --- Enable / Disable switch
 ---
 ---@param event EventData.on_gui_switch_state_changed
-function Gui.onSwitchEnabled(event)
-    local fc_entity = locate_config(event)
+---@param gui framework.gui
+function Gui.onSwitchEnabled(event, gui)
+    local fc_entity = This.fico:entity(gui.entity_id)
     if not fc_entity then return end
 
     fc_entity.config.enabled = on_off_values[event.element.switch_state]
@@ -301,8 +318,9 @@ local values_incl_excl = table.invert(incl_excl_values)
 --- inclusive/exclusive switch
 ---
 ---@param event EventData.on_gui_switch_state_changed
-function Gui.onSwitchExclusive(event)
-    local fc_entity = locate_config(event)
+---@param gui framework.gui
+function Gui.onSwitchExclusive(event, gui)
+    local fc_entity = This.fico:entity(gui.entity_id)
     if not fc_entity then return end
 
     fc_entity.config.include_mode = incl_excl_values[event.element.switch_state]
@@ -312,8 +330,9 @@ end
 
 --- switch green wire
 ---@param event EventData.on_gui_checked_state_changed
-function Gui.onSwitchGreenWire(event)
-    local fc_entity = locate_config(event)
+---@param gui framework.gui
+function Gui.onSwitchGreenWire(event, gui)
+    local fc_entity = This.fico:entity(gui.entity_id)
     if not fc_entity then return end
 
     fc_entity.config.filter_wire = defines.wire_type.green
@@ -323,8 +342,9 @@ end
 
 --- switch red wire
 ---@param event EventData.on_gui_checked_state_changed
-function Gui.onSwitchRedWire(event)
-    local fc_entity = locate_config(event)
+---@param gui framework.gui
+function Gui.onSwitchRedWire(event, gui)
+    local fc_entity = This.fico:entity(gui.entity_id)
     if not fc_entity then return end
 
     fc_entity.config.filter_wire = defines.wire_type.red
@@ -333,8 +353,9 @@ end
 ----------------------------------------------------------------------------------------------------
 
 ---@param event  EventData.on_gui_checked_state_changed
-function Gui.onToggleWireMode(event)
-    local fc_entity = locate_config(event)
+---@param gui framework.gui
+function Gui.onToggleWireMode(event, gui)
+    local fc_entity = This.fico:entity(gui.entity_id)
     if not fc_entity then return end
 
     fc_entity.config.use_wire = event.element.state
@@ -343,8 +364,9 @@ end
 ----------------------------------------------------------------------------------------------------
 
 ---@param event EventData.on_gui_elem_changed
-function Gui.onSelectSignal(event)
-    local fc_entity = locate_config(event)
+---@param gui framework.gui
+function Gui.onSelectSignal(event, gui)
+    local fc_entity = This.fico:entity(gui.entity_id)
     if not fc_entity then return end
 
     if not event.element.tags then return end
@@ -379,9 +401,10 @@ end
 -- create grid buttons for "all signals" constant combinator
 ----------------------------------------------------------------------------------------------------
 
+---@param gui framework.gui
 ---@param fc_entity FilterCombinatorData
 ---@return framework.gui.element_definition[] gui_elements
-local function make_grid_buttons(fc_entity)
+local function make_grid_buttons(gui, fc_entity)
     local filters = fc_entity.config.filters
     local list = {}
 
@@ -396,7 +419,7 @@ local function make_grid_buttons(fc_entity)
                 tags = { idx = idx },
                 style = 'slot_button',
                 elem_type = 'signal',
-                handler = { [defines.events.on_gui_elem_changed] = Gui.onSelectSignal },
+                handler = { [defines.events.on_gui_elem_changed] = gui.gui_events.onSelectSignal },
             }
             if filters[idx] and filters[idx].value then
                 entry.signal = { name = filters[idx].value.name, type = filters[idx].value.type, quality = filters[idx].value.quality, }
@@ -428,10 +451,10 @@ function Gui.update_config_gui_state(gui, fc_entity)
     local on_off = gui:find_element('on-off')
     on_off.switch_state = values_on_off[fc_config.enabled]
 
-    local lamp = gui:find_element('lamp')
+    local lamp = gui:find_element('status-lamp')
     lamp.sprite = tools.STATUS_SPRITES[entity_status]
 
-    local status = gui:find_element('status')
+    local status = gui:find_element('status-label')
     status.caption = { tools.STATUS_NAMES[entity_status] }
 
     local incl_excl = gui:find_element('incl-excl')
@@ -454,7 +477,7 @@ function Gui.update_config_gui_state(gui, fc_entity)
     local green_wire = gui:find_element('green-wire-indicator')
     green_wire.state = fc_config.filter_wire == defines.wire_type.green
 
-    local slot_buttons = make_grid_buttons(fc_entity)
+    local slot_buttons = make_grid_buttons(gui, fc_entity)
     gui:replace_children('signals', slot_buttons)
 end
 
@@ -535,7 +558,6 @@ function Gui.onGuiOpened(event)
     end
 
     assert(entity.unit_number)
-
     local fc_entity = This.fico:entity(entity.unit_number) --[[@as FilterCombinatorData ]]
 
     if not fc_entity then
@@ -552,12 +574,13 @@ function Gui.onGuiOpened(event)
     }
 
     local gui = Framework.gui_manager:create_gui {
+        type = 'combinator-gui',
         player_index = event.player_index,
         parent = player.gui.screen,
-        ui_tree = Gui.get_ui(fc_entity),
+        ui_tree_provider = Gui.getUi,
         context = gui_context,
         update_callback = Gui.guiUpdater,
-        entity_id = entity.unit_number,
+        entity_id = entity.unit_number
     }
 
     player.opened = gui.root
@@ -574,7 +597,9 @@ end
 -- Event registration
 ----------------------------------------------------------------------------------------------------
 
-local function register_events()
+local function init_gui()
+    Framework.gui_manager:register_gui_type('combinator-gui', get_gui_event_definition())
+
     local match_main_entities = tools.create_event_entity_matcher('name', const.main_entity_names)
     local match_ghost_main_entities = tools.create_event_ghost_entity_matcher('ghost_name', const.main_entity_names)
 
@@ -582,7 +607,7 @@ local function register_events()
     Event.on_event(defines.events.on_gui_opened, Gui.onGhostGuiOpened, match_ghost_main_entities)
 end
 
-Event.on_init(register_events)
-Event.on_load(register_events)
+Event.on_init(init_gui)
+Event.on_load(init_gui)
 
 return Gui

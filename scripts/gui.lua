@@ -10,6 +10,7 @@ local table = require('stdlib.utils.table')
 
 local Matchers = require('framework.matchers')
 local tools = require('framework.tools')
+local signal_converter = require('framework.signal_converter')
 
 local const = require('lib.constants')
 
@@ -85,7 +86,6 @@ function Gui.getUi(gui)
             {  -- Body
                 type = 'frame',
                 style = 'entity_frame',
-                style_mods = { width = 424, },
                 children = {
                     {
                         type = 'flow',
@@ -212,14 +212,14 @@ function Gui.getUi(gui)
                                 handler = { [defines.events.on_gui_switch_state_changed] = gui_events.onSwitchExclusive },
                             },
                             {
+                                type = 'line',
+                            },
+                            {
                                 type = 'checkbox',
                                 caption = { const:locale('mode-wire') },
                                 name = 'mode-wire',
                                 handler = { [defines.events.on_gui_checked_state_changed] = gui_events.onToggleWireMode },
                                 state = false,
-                            },
-                            {
-                                type = 'line',
                             },
                             {
                                 type = 'flow',
@@ -255,14 +255,80 @@ function Gui.getUi(gui)
                                 direction = 'vertical',
                                 vertical_scroll_policy = 'auto-and-reserve-space',
                                 horizontal_scroll_policy = 'never',
-                                style_mods = {
-                                    horizontally_stretchable = true,
-                                },
                                 children = {
                                     type = 'table',
                                     style = 'slot_table',
                                     name = 'signals',
                                     column_count = 10,
+                                },
+                            },
+                            {
+                                type = 'line',
+                            },
+                            {
+                                type = 'table',
+                                column_count = 2,
+                                vertical_centering = false,
+                                style_mods = {
+                                    horizontal_spacing = 24,
+                                },
+                                children = {
+                                    {
+                                        type = 'label',
+                                        style = 'semibold_label',
+                                        caption = { 'description.input-signals' },
+                                    },
+                                    {
+                                        type = 'label',
+                                        style = 'semibold_label',
+                                        caption = { 'description.output-signals' },
+                                    },
+                                    {
+                                        type = 'scroll-pane',
+                                        style = 'deep_slots_scroll_pane',
+                                        direction = 'vertical',
+                                        name = 'input-view-pane',
+                                        visible = true,
+                                        vertical_scroll_policy = 'auto-and-reserve-space',
+                                        horizontal_scroll_policy = 'never',
+                                        style_mods = {
+                                            width = 400,
+                                        },
+                                        children = {
+                                            {
+                                                type = 'table',
+                                                style = 'filter_slot_table',
+                                                name = 'input-signal-view',
+                                                column_count = 10,
+                                                style_mods = {
+                                                    vertical_spacing = 4,
+                                                },
+                                            },
+                                        },
+                                    },
+                                    {
+                                        type = 'scroll-pane',
+                                        style = 'deep_slots_scroll_pane',
+                                        direction = 'vertical',
+                                        name = 'output-view-pane',
+                                        visible = true,
+                                        vertical_scroll_policy = 'auto-and-reserve-space',
+                                        horizontal_scroll_policy = 'never',
+                                        style_mods = {
+                                            width = 400,
+                                        },
+                                        children = {
+                                            {
+                                                type = 'table',
+                                                style = 'filter_slot_table',
+                                                name = 'output-signal-view',
+                                                column_count = 10,
+                                                style_mods = {
+                                                    vertical_spacing = 4,
+                                                },
+                                            },
+                                        },
+                                    },
                                 },
                             },
                         },
@@ -271,6 +337,61 @@ function Gui.getUi(gui)
             },
         },
     }
+end
+
+----------------------------------------------------------------------------------------------------
+-- Input/Output signals
+----------------------------------------------------------------------------------------------------
+
+local color_map = {
+    [defines.wire_connector_id.combinator_input_red] = 'red',
+    [defines.wire_connector_id.combinator_input_green] = 'green',
+    [defines.wire_connector_id.combinator_output_red] = 'red',
+    [defines.wire_connector_id.combinator_output_green] = 'green',
+}
+
+---@param gui_element LuaGuiElement?
+---@param fc_entity FilterCombinatorData?
+---@param wires defines.wire_connector_id[]
+local function render_network_signals(gui_element, fc_entity, wires)
+    if not fc_entity then return end
+
+    assert(gui_element)
+    gui_element.clear()
+
+    for _, connector_id in pairs(wires) do
+        local signals = fc_entity.main.get_signals(connector_id)
+        if signals then
+            local signal_count = 0
+            for _, signal in ipairs(signals) do
+                local button = gui_element.add {
+                    type = 'sprite-button',
+                    sprite = signal_converter:signal_to_sprite_name(signal),
+                    number = signal.count,
+                    style = color_map[connector_id] .. '_circuit_network_content_slot',
+                    tooltip = signal_converter:signal_to_prototype(signal).localised_name,
+                    elem_tooltip = signal_converter:signal_to_elem_id(signal),
+                    enabled = true,
+                }
+                if signal.signal.quality and signal.signal.quality ~= 'normal' then
+                    button.add {
+                        type = 'sprite',
+                        style = 'framework_quality',
+                        sprite = 'quality/' .. signal.signal.quality,
+                        enabled = true,
+                    }
+                end
+                signal_count = signal_count + 1
+            end
+            while (signal_count % 10) > 0 do
+                gui_element.add {
+                    type = 'sprite',
+                    enabled = true,
+                }
+                signal_count = signal_count + 1
+            end
+        end
+    end
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -441,22 +562,13 @@ end
 ----------------------------------------------------------------------------------------------------
 
 ---@param gui framework.gui
+---@param connection_state table<defines.wire_connector_id, boolean> Network state, as returned by refresh_gui
 ---@param fc_entity FilterCombinatorData
-function Gui.update_config_gui_state(gui, fc_entity)
+local function update_gui(gui, connection_state, fc_entity)
     local fc_config = fc_entity.config
-
-    local entity_status = (not fc_config.enabled) and defines.entity_status.disabled -- if not enabled, status is disabled
-        or fc_config.status                                                          -- if enabled, the registered state takes precedence if present
-        or defines.entity_status.working                                             -- otherwise, it is working
 
     local on_off = gui:find_element('on-off')
     on_off.switch_state = values_on_off[fc_config.enabled]
-
-    local lamp = gui:find_element('status-lamp')
-    lamp.sprite = tools.STATUS_SPRITES[entity_status]
-
-    local status = gui:find_element('status-label')
-    status.caption = { tools.STATUS_NAMES[entity_status] }
 
     local incl_excl = gui:find_element('incl-excl')
     incl_excl.switch_state = values_incl_excl[fc_config.include_mode]
@@ -484,33 +596,60 @@ end
 
 ---@param gui framework.gui
 ---@param fc_entity FilterCombinatorData
-local function update_gui_state(gui, fc_entity)
+---@return table<defines.wire_connector_id, boolean> connection_state
+local function refresh_gui(gui, fc_entity)
+    local fc_config = fc_entity.config
+
+    local entity_status = (not fc_config.enabled) and defines.entity_status.disabled -- if not enabled, status is disabled
+        or fc_config.status                                                          -- if enabled, the registered state takes precedence if present
+        or defines.entity_status.working                                             -- otherwise, it is working
+
+    local lamp = gui:find_element('status-lamp')
+    lamp.sprite = tools.STATUS_SPRITES[entity_status]
+
+    local status = gui:find_element('status-label')
+    status.caption = { tools.STATUS_NAMES[entity_status] }
+
+    -- render input signals
+    local input_signals = gui:find_element('input-signal-view')
+    render_network_signals(input_signals, fc_entity, { defines.wire_connector_id.combinator_input_green, defines.wire_connector_id.combinator_input_red })
+
+    -- render output signals
+    local output_signals = gui:find_element('output-signal-view')
+    render_network_signals(output_signals, fc_entity, { defines.wire_connector_id.combinator_output_green, defines.wire_connector_id.combinator_output_red })
+
+    local connection_state = {}
+
+    -- render network ids for Input/Output network header
     for _, pin in pairs { 'input', 'output' } do
         local connections = gui:find_element('connections_' .. pin)
         connections.caption = { 'gui-control-behavior.not-connected' }
         for _, color in pairs { 'red', 'green' } do
             local pin_name = ('combinator_%s_%s'):format(pin, color)
 
-            local wire_connector = fc_entity.main.get_wire_connector(defines.wire_connector_id[pin_name], false)
+            local connector_id = defines.wire_connector_id[pin_name]
+            local wire_connector = fc_entity.main.get_wire_connector(connector_id, false)
             local connect = false
 
             local wire_connection = gui:find_element(pin_name)
+            wire_connection.caption = nil
+
             if wire_connector then
                 for _, connection in pairs(wire_connector.connections) do
                     connect = connect or (connection.origin == defines.wire_origin.player)
                     if connect then break end
                 end
             end
+
+            connection_state[connector_id] = connect
+            wire_connection.visible = connect
             if connect then
                 connections.caption = { 'gui-control-behavior.connected-to-network' }
-                wire_connection.visible = true
                 wire_connection.caption = { ('gui-control-behavior.%s-network-id'):format(color), wire_connector.network_id }
-            else
-                wire_connection.visible = false
-                wire_connection.caption = nil
             end
         end
     end
+    return connection_state
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -528,14 +667,24 @@ function Gui.guiUpdater(gui)
 
     This.fico:tick(fc_entity)
 
-    if not (context.last_config and table.compare(context.last_config, fc_entity.config)) then
+    -- always update wire state and preview
+    local connection_state = refresh_gui(gui, fc_entity)
+
+    local refresh_config = not (context.last_config and table.compare(context.last_config, fc_entity.config))
+    local refresh_state = not (context.last_connection_state and table.compare(context.last_connection_state, connection_state))
+
+    if refresh_config or refresh_state then
+        update_gui(gui, connection_state, fc_entity)
+    end
+
+    if refresh_config then
         This.fico:reconfigure(fc_entity)
-        Gui.update_config_gui_state(gui, fc_entity)
         context.last_config = tools.copy(fc_entity.config)
     end
 
-    -- always update wire state
-    update_gui_state(gui, fc_entity)
+    if refresh_state then
+        context.last_connection_state = connection_state
+    end
 
     return true
 end
@@ -570,8 +719,10 @@ function Gui.onGuiOpened(event)
 
     ---@class filter_combinator.GuiContext
     ---@field last_config FilterCombinatorConfig?
+    ---@field last_connection_state table<defines.wire_connector_id, boolean>?
     local gui_context = {
         last_config = nil,
+        last_connection_state = nil,
     }
 
     local gui = Framework.gui_manager:create_gui {

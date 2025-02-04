@@ -18,7 +18,7 @@ local function ccs_get_info(entity)
     if not fc_entity then return end
 
     return {
-        fc_config = fc_entity.config
+        [const.config_tag_name] = fc_entity.config
     }
 end
 
@@ -37,7 +37,7 @@ local function ccs_create_packed_entity(info, surface, position, force)
     assert(packed_main)
     script.register_on_object_destroyed(packed_main)
 
-    local fc_entity = This.fico:create(packed_main, nil, info)
+    local fc_entity = This.fico:create(packed_main, info[const.config_tag_name])
     assert(fc_entity)
 
     return packed_main
@@ -57,7 +57,7 @@ local function ccs_create_entity(info, surface, force)
     assert(main)
     script.register_on_object_destroyed(main)
 
-    local fc_entity = This.fico:create(main, nil, info)
+    local fc_entity = This.fico:create(main, info[const.config_tag_name])
     assert(fc_entity)
 
     return main

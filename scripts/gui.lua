@@ -8,6 +8,7 @@ local Event = require('stdlib.event.event')
 local Player = require('stdlib.event.player')
 local table = require('stdlib.utils.table')
 
+local Matchers = require('framework.matchers')
 local tools = require('framework.tools')
 
 local const = require('lib.constants')
@@ -600,8 +601,8 @@ end
 local function init_gui()
     Framework.gui_manager:register_gui_type('combinator-gui', get_gui_event_definition())
 
-    local match_main_entities = tools.create_event_entity_matcher('name', const.main_entity_names)
-    local match_ghost_main_entities = tools.create_event_ghost_entity_matcher('ghost_name', const.main_entity_names)
+    local match_main_entities = Matchers:matchEventEntityName(const.main_entity_names)
+    local match_ghost_main_entities = Matchers:matchEventEntityGhostName(const.main_entity_names)
 
     Event.on_event(defines.events.on_gui_opened, Gui.onGuiOpened, match_main_entities)
     Event.on_event(defines.events.on_gui_opened, Gui.onGhostGuiOpened, match_ghost_main_entities)

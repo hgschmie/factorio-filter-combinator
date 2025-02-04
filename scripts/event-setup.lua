@@ -7,11 +7,10 @@ local Event = require('stdlib.event.event')
 local Is = require('stdlib.utils.is')
 local Player = require('stdlib.event.player')
 
+local Matchers = require('framework.matchers')
 local tools = require('framework.tools')
 
 local const = require('lib.constants')
-
-local Gui = require('scripts.gui')
 
 --------------------------------------------------------------------------------
 -- entity create / delete
@@ -21,19 +20,20 @@ local Gui = require('scripts.gui')
 local function onEntityCreated(event)
     local entity = event and event.entity
 
-    local player_index = event.player_index
     local tags = event.tags
 
-    local entity_ghost = Framework.ghost_manager:findMatchingGhost(entity)
+    local entity_ghost = Framework.ghost_manager:findGhostForEntity(entity)
     if entity_ghost then
-        player_index = player_index or entity_ghost.player_index
+        Framework.ghost_manager:deleteGhost(entity.unit_number)
         tags = tags or entity_ghost.tags
     end
+
+    local config = tags and tags[const.config_tag_name]
 
     -- register entity for destruction
     script.register_on_object_destroyed(entity)
 
-    This.fico:create(entity, player_index, tags)
+    This.fico:create(entity, config)
 end
 
 ---@param event EventData.on_player_mined_entity | EventData.on_robot_mined_entity | EventData.on_entity_died | EventData.script_raised_destroy
@@ -69,9 +69,7 @@ local function onMainEntityCloned(event)
     local src_data = This.fico:entity(event.source.unit_number)
     if not src_data then return end
 
-    local tags = { fc_config = src_data.config } -- clone the config from the src to the destination
-
-    This.fico:create(event.destination, nil, tags)
+    This.fico:create(event.destination, nil, src_data.config)
 end
 
 ---@param event EventData.on_entity_cloned
@@ -152,15 +150,15 @@ end
 --------------------------------------------------------------------------------
 
 local function register_events()
-    local match_main_entities = tools.create_event_entity_matcher('name', const.main_entity_names)
-    local match_internal_entities = tools.create_event_entity_matcher('name', const.internal_entity_names)
+    local match_main_entities = Matchers:matchEventEntityName(const.main_entity_names)
+    local match_internal_entities = Matchers:matchEventEntityName(const.internal_entity_names)
 
     -- manage ghost building (robot building)
-    Framework.ghost_manager:register_for_ghost_names(const.main_entity_names)
+    Framework.ghost_manager:registerForName(const.main_entity_names)
 
     -- entity create / delete
-    tools.event_register(tools.CREATION_EVENTS, onEntityCreated, match_main_entities)
-    tools.event_register(tools.DELETION_EVENTS, onEntityDeleted, match_main_entities)
+    Event.register(Matchers.CREATION_EVENTS, onEntityCreated, match_main_entities)
+    Event.register(Matchers.DELETION_EVENTS, onEntityDeleted, match_main_entities)
 
     -- entity destroy
     Event.register(defines.events.on_object_destroyed, onObjectDestroyed)
@@ -173,7 +171,13 @@ local function register_events()
     Event.register(defines.events.on_entity_settings_pasted, onEntitySettingsPasted, match_main_entities)
 
     -- Manage blueprint configuration setting
-    Framework.blueprint:register_callback(const.filter_combinator_name, This.fico.blueprint_callback)
+    Framework.blueprint:registerCallback(const.filter_combinator_name, This.fico.serialize_config)
+
+    -- Manage tombstones
+    Framework.tombstone:registerCallback(const.filter_combinator_name, {
+        create_tombstone = This.fico.serialize_config,
+        apply_tombstone = Framework.ghost_manager.mapTombstoneToGhostTags,
+    })
 
     -- config change events
     -- Configuration changes (runtime and startup)

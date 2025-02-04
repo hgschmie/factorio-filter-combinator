@@ -17,6 +17,7 @@ Constants.prefix = 'hps__fc-'
 Constants.name = 'filter-combinator'
 Constants.root = '__filter-combinator-improved__'
 Constants.gfx_location = Constants.root .. '/graphics/'
+Constants.config_tag_name = 'fc_config'
 
 --------------------------------------------------------------------------------
 -- Framework intializer

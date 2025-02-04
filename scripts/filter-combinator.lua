@@ -224,13 +224,13 @@ end
 --    -2/ 0 (signals)   0/ 0 (main) 2/ 0 (pos_split)  4/ 0 (neg_split)
 --
 local sub_entities = {
-    { id = 'signals',    type = 'cc', x =  0, y = 2,  desc = 'GUI Settings' },
+    { id = 'signals',    type = 'cc', x = 0,  y = 2, desc = 'GUI Settings' },
 
-    { id = 'pos_split',  type = 'dc', x =  2, y = 2,  desc = 'Split out all positive data signals.' },
-    { id = 'neg_split',  type = 'dc', x =  4, y = 2,  desc = 'Split out all negative data signals.' },
+    { id = 'pos_split',  type = 'dc', x = 2,  y = 2, desc = 'Split out all positive data signals.' },
+    { id = 'neg_split',  type = 'dc', x = 4,  y = 2, desc = 'Split out all negative data signals.' },
 
-    { id = 'pos_filter', type = 'dc', x =  2, y = 0, desc = 'Positive signal filter. Removes unwanted signals.' },
-    { id = 'neg_filter', type = 'dc', x =  4, y = 0, desc = 'Negative signal filter. Removes unwanted signals.' },
+    { id = 'pos_filter', type = 'dc', x = 2,  y = 0, desc = 'Positive signal filter. Removes unwanted signals.' },
+    { id = 'neg_filter', type = 'dc', x = 4,  y = 0, desc = 'Negative signal filter. Removes unwanted signals.' },
 
     { id = 'sig_norm',   type = 'dc', x = -2, y = 2, desc = 'Normalizes all signals to 0/1' },
     { id = 'sig_shift',  type = 'ac', x = -2, y = 0, desc = 'Shifts values to 0/2^31' },
@@ -253,7 +253,6 @@ local dc_config = {
     init = {
         { src = 'pos_split', comparator = '>',  second_constant = 0 },
         { src = 'neg_split', comparator = '<',  second_constant = 0 },
---        { src = 'neg_proc',  comparator = '>',  second_constant = - 2^31 },
         { src = 'sig_norm',  comparator = '!=', second_constant = 0, copy_count_from_input = false, }
     },
 
@@ -278,9 +277,7 @@ local dc_config = {
 
 local ac_config = {
     init = {
---        { src = 'pos_proc',  operation = 'AND', second_constant = 2 ^ 31 - 1, },
---        { src = 'neg_proc',  operation = 'AND', second_constant = 2 ^ 31 - 1, },
-        { src = 'sig_shift', operation = '<<',  second_constant = 31, }
+        { src = 'sig_shift', operation = '<<', second_constant = 31, }
     }
 }
 
@@ -290,16 +287,14 @@ local wiring = {
     init = {
         -- all data path connections use red wires
         -- positive signal path
-        { src = 'pos_split',  dst = 'pos_filter', src_circuit = 'output', dst_circuit = 'input', wire = 'red' },
---        { src = 'pos_filter', dst = 'pos_proc',   src_circuit = 'output', dst_circuit = 'input', wire = 'red' },
+        { src = 'pos_split', dst = 'pos_filter', src_circuit = 'output', dst_circuit = 'input', wire = 'red' },
         -- negative signal path
-        { src = 'neg_split',  dst = 'neg_filter', src_circuit = 'output', dst_circuit = 'input', wire = 'red' },
---        { src = 'neg_filter', dst = 'neg_proc',   src_circuit = 'output', dst_circuit = 'input', wire = 'red' },
+        { src = 'neg_split', dst = 'neg_filter', src_circuit = 'output', dst_circuit = 'input', wire = 'red' },
 
         -- all signal path connection use green wires
-        { src = 'sig_norm',   dst = 'sig_shift',  src_circuit = 'output', dst_circuit = 'input', wire = 'green', },
-        { src = 'sig_shift',  dst = 'pos_filter', src_circuit = 'output', dst_circuit = 'input', wire = 'green', },
-        { src = 'sig_shift',  dst = 'neg_filter', src_circuit = 'output', dst_circuit = 'input', wire = 'green', },
+        { src = 'sig_norm',  dst = 'sig_shift',  src_circuit = 'output', dst_circuit = 'input', wire = 'green', },
+        { src = 'sig_shift', dst = 'pos_filter', src_circuit = 'output', dst_circuit = 'input', wire = 'green', },
+        { src = 'sig_shift', dst = 'neg_filter', src_circuit = 'output', dst_circuit = 'input', wire = 'green', },
     },
 
     -- enable the FC - wire the processors to the main entity output pins
@@ -312,11 +307,11 @@ local wiring = {
 
     -- do not use a wire for signal selection. Wire the signal buffer to the signal controller and both data wires to the data buffer
     no_wire = {
-        { src = 'signals',                        dst = 'sig_norm',  dst_circuit = 'input', wire = 'green', },
-        { src = 'main',    src_circuit = 'input', dst = 'pos_split', dst_circuit = 'input', wire = 'red', },
-        { src = 'main',    src_circuit = 'input', dst = 'pos_split', dst_circuit = 'input', wire = 'green', },
-        { src = 'main',    src_circuit = 'input', dst = 'neg_split', dst_circuit = 'input', wire = 'red', },
-        { src = 'main',    src_circuit = 'input', dst = 'neg_split', dst_circuit = 'input', wire = 'green', },
+        { src = 'signals', dst = 'sig_norm',      dst_circuit = 'input', wire = 'green', },
+        { src = 'main',    src_circuit = 'input', dst = 'pos_split',     dst_circuit = 'input', wire = 'red', },
+        { src = 'main',    src_circuit = 'input', dst = 'pos_split',     dst_circuit = 'input', wire = 'green', },
+        { src = 'main',    src_circuit = 'input', dst = 'neg_split',     dst_circuit = 'input', wire = 'red', },
+        { src = 'main',    src_circuit = 'input', dst = 'neg_split',     dst_circuit = 'input', wire = 'green', },
     },
 
     -- use red wire for signal selection. Wire it to the signal buffer, wire only the green wire to the data buffer
@@ -369,6 +364,7 @@ local function create_internal_entity(cfg)
         position = { x = main.position.x + x, y = main.position.y + y },
         direction = main.direction,
         force = main.force,
+        quality = main.quality,
 
         create_build_effect_smoke = false,
         spawn_decorations = false,
@@ -507,9 +503,8 @@ end
 --- Creates a new entity from the main entity, registers with the mod
 --- and configures it.
 ---@param main LuaEntity
----@param player_index integer?
----@param tags Tags?
-function FiCo:create(main, player_index, tags)
+---@param config FilterCombinatorConfig?
+function FiCo:create(main, config)
     if not Is.Valid(main) then return end
 
     local entity_id = main.unit_number --[[@as integer]]
@@ -517,10 +512,10 @@ function FiCo:create(main, player_index, tags)
     assert(self:entity(entity_id) == nil)
 
     -- if true, draw all combinators and wires. For debugging
-    local comb_visible = player_index and Framework.settings:runtime_setting('debug_mode') --[[@as boolean]]
+    local comb_visible = Framework.settings:runtime_setting('debug_mode')
 
-    -- if tags were passed in and they contain a fc config, use that.
-    local config = create_config(tags and tags['fc_config'] --[[@as FilterCombinatorConfig]])
+    -- if config was passed in, use that
+    config = create_config(config)
     config.status = main.status
 
     ---@type FilterCombinatorData
@@ -557,20 +552,20 @@ function FiCo:destroy(entity_id)
 end
 
 --------------------------------------------------------------------------------
--- Blueprint
+-- Config serialization for blueprint and tombstone
 --------------------------------------------------------------------------------
 
 ---@param entity LuaEntity
----@param idx integer
----@param blueprint LuaItemStack
----@param context table<string, any>
-function FiCo.blueprint_callback(entity, idx, blueprint, context)
+---@return table<string, any>?
+function FiCo.serialize_config(entity)
     if not Is.Valid(entity) then return end
 
     local fico_entity = This.fico:entity(entity.unit_number)
     if not fico_entity then return end
 
-    blueprint.set_blueprint_entity_tag(idx, 'fc_config', fico_entity.config)
+    return {
+        [const.config_tag_name] = fico_entity.config,
+    }
 end
 
 ------------------------------------------------------------------------

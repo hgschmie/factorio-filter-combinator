@@ -1,7 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 3.6.1
 Date: ????
-  Changes:
+  Bugfixes:
+    - Map additional prototype types for signal and filter conversion. Fixes #4, reported by @Hoochie63
 ---------------------------------------------------------------------------------------------------
 Version: 3.6.0
 Date: 2025-02-04

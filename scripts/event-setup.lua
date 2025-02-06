@@ -69,7 +69,7 @@ local function onMainEntityCloned(event)
     local src_data = This.fico:entity(event.source.unit_number)
     if not src_data then return end
 
-    This.fico:create(event.destination, nil, src_data.config)
+    This.fico:create(event.destination, src_data.config)
 end
 
 ---@param event EventData.on_entity_cloned

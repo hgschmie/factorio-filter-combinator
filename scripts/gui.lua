@@ -752,11 +752,11 @@ end
 local function init_gui()
     Framework.gui_manager:register_gui_type('combinator-gui', get_gui_event_definition())
 
-    local match_main_entities = Matchers:matchEventEntityName(const.main_entity_names)
-    local match_ghost_main_entities = Matchers:matchEventEntityGhostName(const.main_entity_names)
+    local match_main_entity = Matchers:matchEventEntityName(const.filter_combinator_name)
+    local match_ghost_main_entity = Matchers:matchEventEntityGhostName(const.filter_combinator_name)
 
-    Event.on_event(defines.events.on_gui_opened, Gui.onGuiOpened, match_main_entities)
-    Event.on_event(defines.events.on_gui_opened, Gui.onGhostGuiOpened, match_ghost_main_entities)
+    Event.on_event(defines.events.on_gui_opened, Gui.onGuiOpened, match_main_entity)
+    Event.on_event(defines.events.on_gui_opened, Gui.onGhostGuiOpened, match_ghost_main_entity)
 end
 
 Event.on_init(init_gui)

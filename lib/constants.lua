@@ -15,6 +15,7 @@ Constants.current_version = 10
 
 Constants.prefix = 'hps__fc-'
 Constants.name = 'filter-combinator'
+Constants.name_packed = Constants.name .. '-packed' -- for compakt circuits
 Constants.root = '__filter-combinator-improved__'
 Constants.gfx_location = Constants.root .. '/graphics/'
 Constants.config_tag_name = 'fc_config'
@@ -59,6 +60,25 @@ function Constants:locale(id)
     return Constants:with_prefix('gui.') .. id
 end
 
+
+--------------------------------------------------------------------------------
+-- data helper
+--------------------------------------------------------------------------------
+
+Constants.ac_sprites = {
+    'plus_symbol_sprites',
+    'minus_symbol_sprites',
+    'multiply_symbol_sprites',
+    'divide_symbol_sprites',
+    'modulo_symbol_sprites',
+    'power_symbol_sprites',
+    'left_shift_symbol_sprites',
+    'right_shift_symbol_sprites',
+    'and_symbol_sprites',
+    'or_symbol_sprites',
+    'xor_symbol_sprites',
+}
+
 --------------------------------------------------------------------------------
 -- entity names and maps
 --------------------------------------------------------------------------------
@@ -67,11 +87,7 @@ end
 Constants.filter_combinator_name = Constants:with_prefix(Constants.name)
 
 -- Compactcircuits support
-Constants.filter_combinator_name_packed = Constants:with_prefix('filter-combinator-packed')
-
-Constants.main_entity_names = {
-    Constants.filter_combinator_name, Constants.filter_combinator_name_packed,
-}
+Constants.filter_combinator_name_packed = Constants:with_prefix(Constants.name_packed)
 
 -- Internal entities in normal and debug mode
 Constants.internal_ac_name = Constants:with_prefix('filter-combinator-ac')

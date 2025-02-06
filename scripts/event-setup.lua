@@ -150,25 +150,30 @@ end
 --------------------------------------------------------------------------------
 
 local function register_events()
-    local match_main_entities = Matchers:matchEventEntityName(const.main_entity_names)
+    local match_all_main_entities = Matchers:matchEventEntityName {
+        const.filter_combinator_name,
+        const.filter_combinator_name_packed,
+    }
+
+    local match_main_entity = Matchers:matchEventEntityName(const.filter_combinator_name)
     local match_internal_entities = Matchers:matchEventEntityName(const.internal_entity_names)
 
     -- manage ghost building (robot building)
-    Framework.ghost_manager:registerForName(const.main_entity_names)
+    Framework.ghost_manager:registerForName(const.filter_combinator_name)
 
     -- entity create / delete
-    Event.register(Matchers.CREATION_EVENTS, onEntityCreated, match_main_entities)
-    Event.register(Matchers.DELETION_EVENTS, onEntityDeleted, match_main_entities)
+    Event.register(Matchers.CREATION_EVENTS, onEntityCreated, match_all_main_entities)
+    Event.register(Matchers.DELETION_EVENTS, onEntityDeleted, match_all_main_entities)
 
     -- entity destroy
     Event.register(defines.events.on_object_destroyed, onObjectDestroyed)
 
     -- Entity cloning
-    Event.register(defines.events.on_entity_cloned, onMainEntityCloned, match_main_entities)
+    Event.register(defines.events.on_entity_cloned, onMainEntityCloned, match_main_entity)
     Event.register(defines.events.on_entity_cloned, onInternalEntityCloned, match_internal_entities)
 
     -- Entity settings pasting
-    Event.register(defines.events.on_entity_settings_pasted, onEntitySettingsPasted, match_main_entities)
+    Event.register(defines.events.on_entity_settings_pasted, onEntitySettingsPasted, match_main_entity)
 
     -- Manage blueprint configuration setting
     Framework.blueprint:registerCallback(const.filter_combinator_name, This.fico.serialize_config)

@@ -82,6 +82,22 @@ end
 
 --------------------------------------------------------------------------------
 
+function CompaktCircuitSupport.data()
+    local data_util = require('framework.prototypes.data-util')
+
+    local fc_packed = data_util.copy_prototype(data.raw['arithmetic-combinator'][const.filter_combinator_name],
+        const.filter_combinator_name_packed, true) --[[@as data.ArithmeticCombinatorPrototype ]]
+
+    -- ArithmeticCombinatorPrototype
+    for _, field in pairs(const.ac_sprites) do
+        fc_packed[field] = util.empty_sprite()
+    end
+
+    data:extend { fc_packed }
+end
+
+--------------------------------------------------------------------------------
+
 function CompaktCircuitSupport.runtime()
     local Event = require('stdlib.event.event')
 

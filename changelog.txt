@@ -1,8 +1,9 @@
 ---------------------------------------------------------------------------------------------------
 Version: 3.6.1
-Date: ????
+Date: 2025-02-06
   Bugfixes:
     - Map additional prototype types for signal and filter conversion. Fixes #4, reported by @Hoochie63
+    - Don't crash with 'unknown entity name' if compact circuit is not loaded.
 ---------------------------------------------------------------------------------------------------
 Version: 3.6.0
 Date: 2025-02-04

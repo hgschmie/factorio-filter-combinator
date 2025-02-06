@@ -115,17 +115,6 @@ local function onConfigurationChanged(changed)
             force.recipes[const.filter_combinator_name].enabled = force.technologies['circuit-network'].researched
         end
     end
-
-    for _, fc_entity in pairs(This.fico:entities()) do
-        if fc_entity.ref.signals then
-            local control_behavior = fc_entity.ref.signals.get_or_create_control_behavior() --[[ @as LuaConstantCombinatorControlBehavior ]]
-            if control_behavior then
-                for i = 1, control_behavior.sections_count, 1 do
-                    control_behavior.sections[i].group = ''
-                end
-            end
-        end
-    end
 end
 
 --------------------------------------------------------------------------------

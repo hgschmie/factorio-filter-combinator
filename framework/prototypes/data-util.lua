@@ -101,7 +101,7 @@ end
 ---@param prototype data.Prototype
 ---@param new_name string The new name of the entity
 ---@return data.Prototype
-function FrameworkDataUtil.copy_prototype(prototype, new_name)
+function FrameworkDataUtil.copy_other_prototype(prototype, new_name)
     if not prototype.type or not prototype.name then
         error('Invalid prototype: prototypes must have name and type properties.')
     end

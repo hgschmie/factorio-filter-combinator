@@ -85,21 +85,25 @@ end
 --------------------------------------------------------------------------------
 
 function CompaktCircuitSupport.data()
+    assert(data.raw)
+
     local data_util = require('framework.prototypes.data-util')
 
-    local fc_packed = data_util.copy_entity_prototype(data.raw['arithmetic-combinator'][const.filter_combinator_name], const.filter_combinator_name_packed, true) --[[@as data.ArithmeticCombinatorPrototype ]]
+    local fc_entity_packed = data_util.copy_entity_prototype(data.raw['arithmetic-combinator'][const.filter_combinator_name], const.filter_combinator_name_packed, true) --[[@as data.ArithmeticCombinatorPrototype ]]
 
     -- ArithmeticCombinatorPrototype
     for _, field in pairs(const.ac_sprites) do
-        fc_packed[field] = util.empty_sprite()
+        fc_entity_packed[field] = util.empty_sprite()
     end
 
-    data:extend { fc_packed }
+    data:extend { fc_entity_packed }
 end
 
 --------------------------------------------------------------------------------
 
 function CompaktCircuitSupport.runtime()
+    assert(script)
+
     local Event = require('stdlib.event.event')
 
     Event.on_init(ccs_init)

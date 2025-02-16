@@ -18,7 +18,6 @@ local item = util.copy(data.raw.item['arithmetic-combinator'])
 item.name = const.filter_combinator_name
 item.place_result = const.filter_combinator_name
 item.icon = const:png('filter-combinator-improved')
-item.flags = { 'mod-openable' }
 item.order = 'c[combinators]-b[filter-combinator-improved]'
 
 ---@type data.RecipePrototype

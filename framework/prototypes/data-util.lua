@@ -60,10 +60,6 @@ function FrameworkDataUtil.copy_entity_prototype(prototype, new_name, make_invis
 
     if not make_invisible then return p end
 
-    p.icon = nil
-    p.icon_size = nil
-    p.icons = nil
-
     ---@diagnostic disable: inject-field, undefined-field
     -- CombinatorPrototype
     if p.sprites then p.sprites = util.empty_sprite() end

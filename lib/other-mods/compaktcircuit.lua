@@ -67,17 +67,19 @@ end
 
 local function ccs_init()
     if not Framework.remote_api then return end
-    if not (remote.interfaces['compaktcircuit'] and remote.interfaces['compaktcircuit']['add_combinator']) then return end
+    if not remote.interfaces['compaktcircuit'] then return end
 
-    Framework.remote_api.get_info = ccs_get_info
-    Framework.remote_api.create_packed_entity = ccs_create_packed_entity
-    Framework.remote_api.create_entity = ccs_create_entity
+    if remote.interfaces['compaktcircuit']['add_combinator'] then
+        Framework.remote_api.get_info = ccs_get_info
+        Framework.remote_api.create_packed_entity = ccs_create_packed_entity
+        Framework.remote_api.create_entity = ccs_create_entity
 
-    remote.call('compaktcircuit', 'add_combinator', {
-        name = const.filter_combinator_name,
-        packed_names = { const.filter_combinator_name_packed },
-        interface_name = const.filter_combinator_name,
-    })
+        remote.call('compaktcircuit', 'add_combinator', {
+            name = const.filter_combinator_name,
+            packed_names = { const.filter_combinator_name_packed },
+            interface_name = const.filter_combinator_name,
+        })
+    end
 end
 
 --------------------------------------------------------------------------------
@@ -85,8 +87,7 @@ end
 function CompaktCircuitSupport.data()
     local data_util = require('framework.prototypes.data-util')
 
-    local fc_packed = data_util.copy_prototype(data.raw['arithmetic-combinator'][const.filter_combinator_name],
-        const.filter_combinator_name_packed, true) --[[@as data.ArithmeticCombinatorPrototype ]]
+    local fc_packed = data_util.copy_entity_prototype(data.raw['arithmetic-combinator'][const.filter_combinator_name], const.filter_combinator_name_packed, true) --[[@as data.ArithmeticCombinatorPrototype ]]
 
     -- ArithmeticCombinatorPrototype
     for _, field in pairs(const.ac_sprites) do

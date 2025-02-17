@@ -4,7 +4,6 @@
 
 local const = require('lib.constants')
 local Is = require('stdlib.utils.is')
-local tools = require('framework.tools')
 
 local CompaktCircuitSupport = {}
 
@@ -22,6 +21,14 @@ local function ccs_get_info(entity)
     }
 end
 
+---@class filter_combinator.CompactCircuitInfo
+---@field name string
+---@field index number
+---@field position MapPosition
+---@field direction defines.direction
+---@field fc_config FilterCombinatorConfig
+
+---@param info filter_combinator.CompactCircuitInfo
 ---@param surface LuaSurface
 ---@param position MapPosition
 ---@param force LuaForce
@@ -29,13 +36,12 @@ local function ccs_create_packed_entity(info, surface, position, force)
     local packed_main = surface.create_entity {
         name = const.filter_combinator_name_packed,
         position = position,
-        force = force,
         direction = info.direction,
+        force = force,
         raise_built = false,
     }
 
     assert(packed_main)
-    script.register_on_object_destroyed(packed_main)
 
     local fc_entity = This.fico:create(packed_main, info[const.config_tag_name])
     assert(fc_entity)
@@ -43,19 +49,19 @@ local function ccs_create_packed_entity(info, surface, position, force)
     return packed_main
 end
 
+---@param info filter_combinator.CompactCircuitInfo
 ---@param surface LuaSurface
 ---@param force LuaForce
 local function ccs_create_entity(info, surface, force)
     local main = surface.create_entity {
         name = const.filter_combinator_name,
         position = info.position,
-        force = force,
         direction = info.direction,
-        raise_built = false
+        force = force,
+        raise_built = false,
     }
 
     assert(main)
-    script.register_on_object_destroyed(main)
 
     local fc_entity = This.fico:create(main, info[const.config_tag_name])
     assert(fc_entity)
@@ -89,12 +95,16 @@ function CompaktCircuitSupport.data()
 
     local data_util = require('framework.prototypes.data-util')
 
-    local fc_entity_packed = data_util.copy_entity_prototype(data.raw['arithmetic-combinator'][const.filter_combinator_name], const.filter_combinator_name_packed, true) --[[@as data.ArithmeticCombinatorPrototype ]]
+    local fc_entity_packed = data_util.copy_entity_prototype(data.raw['arithmetic-combinator'][const.filter_combinator_name],
+        const.filter_combinator_name_packed, true) --[[@as data.ArithmeticCombinatorPrototype ]]
 
     -- ArithmeticCombinatorPrototype
     for _, field in pairs(const.ac_sprites) do
         fc_entity_packed[field] = util.empty_sprite()
     end
+
+    fc_entity_packed.hidden = true
+    fc_entity_packed.hidden_in_factoriopedia = true
 
     data:extend { fc_entity_packed }
 end

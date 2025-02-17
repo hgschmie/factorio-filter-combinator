@@ -1,8 +1,11 @@
 ---------------------------------------------------------------------------------------------------
 Version: 3.7.0
-Date: ????-??-??
+Date: 2025-02-17
   Bugfixes:
     - Fix crash when cloning entity
+  Changes:
+    - small fixes to align combinator code
+    - increase tick frequency but only update 1/10 of the combinators each time
 ---------------------------------------------------------------------------------------------------
 Version: 3.6.1
 Date: 2025-02-06

@@ -406,10 +406,11 @@ end
 --- Rewires a FC to match its configuration. Must be called after every configuration
 --- change.
 ---@param fc_entity FilterCombinatorData
-function FiCo:reconfigure(fc_entity)
+---@param fc_config FilterCombinatorConfig?
+function FiCo:reconfigure(fc_entity, fc_config)
     if not fc_entity then return end
 
-    local fc_config = fc_entity.config
+    fc_config = fc_config and util.copy(fc_config) or fc_entity.config
 
     local enabled = fc_config.enabled and tools.STATUS_TABLE[fc_entity.config.status] ~= 'RED'
 
@@ -537,17 +538,19 @@ end
 
 --- Destroys a FC and all its sub-entities
 ---@param entity_id integer main unit number (== entity id)
+---@return boolean true if an entity was actually destroyed
 function FiCo:destroy(entity_id)
     assert(Is.Number(entity_id))
 
     local fc_entity = self:entity(entity_id)
-    if not fc_entity then return end
+    if not fc_entity then return false end
 
     for _, sub_entity in pairs(fc_entity.entities) do
         sub_entity.destroy()
     end
 
     self:setEntity(entity_id, nil)
+    return true
 end
 
 --------------------------------------------------------------------------------

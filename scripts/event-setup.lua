@@ -18,8 +18,9 @@ local TICK_INTERVAL = 10
 --------------------------------------------------------------------------------
 
 ---@param event EventData.on_built_entity | EventData.on_robot_built_entity | EventData.on_space_platform_built_entity | EventData.script_raised_revive | EventData.script_raised_built
-local function onEntityCreated(event)
+local function on_entity_created(event)
     local entity = event and event.entity
+    if not entity then return end
 
     local tags = event.tags
 
@@ -35,7 +36,7 @@ local function onEntityCreated(event)
 end
 
 ---@param event EventData.on_player_mined_entity | EventData.on_robot_mined_entity | EventData.on_space_platform_mined_entity | EventData.script_raised_destroy
-local function onEntityDeleted(event)
+local function on_entity_deleted(event)
     local entity = event and event.entity
     if not (entity and entity.valid) then return end
     assert(entity.unit_number)
@@ -51,7 +52,7 @@ end
 --------------------------------------------------------------------------------
 
 ---@param event EventData.on_object_destroyed
-local function onObjectDestroyed(event)
+local function on_object_destroyed(event)
     -- main entity destroyed
     if This.fico:destroy(event.useful_id) then
         storage.last_tick_entity = nil
@@ -64,18 +65,16 @@ end
 --------------------------------------------------------------------------------
 
 ---@param event EventData.on_entity_cloned
-local function onMainEntityCloned(event)
-    if not (event.source and event.source.valid and event.destination and event.destination.valid) then return end
+local function on_entity_cloned(event)
+    if not (event and event.source and event.source.valid and event.destination and event.destination.valid) then return end
 
     local src_data = This.fico:entity(event.source.unit_number)
     if not src_data then return end
 
-    local cloned_entities = event.destination.surface.find_entities_filtered {
+    for _, cloned_entity in pairs(event.destination.surface.find_entities_filtered {
         area = Position(event.destination.position):expand_to_area(0.5),
-        name = const.internal_entity_names
-    }
-
-    for _, cloned_entity in pairs(cloned_entities) do
+        name = const.internal_entity_names,
+    }) do
         cloned_entity.destroy()
     end
 
@@ -83,7 +82,7 @@ local function onMainEntityCloned(event)
 end
 
 ---@param event EventData.on_entity_cloned
-local function onInternalEntityCloned(event)
+local function on_internal_entity_cloned(event)
     if not (event.source and event.source.valid and event.destination and event.destination.valid) then return end
 
     -- delete the destination entity, it is not needed as the internal structure of the
@@ -96,9 +95,10 @@ end
 --------------------------------------------------------------------------------
 
 ---@param event EventData.on_entity_settings_pasted
-local function onEntitySettingsPasted(event)
-    local player = Player.get(event.player_index)
+local function on_entity_settings_pasted(event)
+    if not (event and event.source and event.source.valid and event.destination and event.destination.valid) then return end
 
+    local player = Player.get(event.player_index)
     if not (player and player.valid and player.force == event.source.force and player.force == event.destination.force) then return end
 
     local src_fc_entity = This.fico:entity(event.source.unit_number)
@@ -110,10 +110,10 @@ local function onEntitySettingsPasted(event)
 end
 
 --------------------------------------------------------------------------------
--- Configuration changes (runtime and startup)
+-- Configuration changes (startup)
 --------------------------------------------------------------------------------
 
-local function onConfigurationChanged()
+local function on_configuration_changed()
     This.fico:init()
 
     -- enable filter combinator if circuit network is researched.
@@ -167,19 +167,18 @@ local function register_events()
     local match_main_entity = Matchers:matchEventEntityName(const.filter_combinator_name)
     local match_internal_entities = Matchers:matchEventEntityName(const.internal_entity_names)
 
-
     -- entity create / delete
-    Event.register(Matchers.CREATION_EVENTS, onEntityCreated, match_all_main_entities)
-    Event.register(Matchers.DELETION_EVENTS, onEntityDeleted, match_all_main_entities)
+    Event.register(Matchers.CREATION_EVENTS, on_entity_created, match_all_main_entities)
+    Event.register(Matchers.DELETION_EVENTS, on_entity_deleted, match_all_main_entities)
 
     -- manage ghost building (robot building)
     Framework.ghost_manager:registerForName(const.filter_combinator_name)
 
     -- entity destroy (can't filter on that)
-    Event.register(defines.events.on_object_destroyed, onObjectDestroyed)
+    Event.register(defines.events.on_object_destroyed, on_object_destroyed)
 
     -- Configuration changes (startup)
-    Event.on_configuration_changed(onConfigurationChanged)
+    Event.on_configuration_changed(on_configuration_changed)
 
     -- manage blueprinting and copy/paste
     Framework.blueprint:registerCallback(const.filter_combinator_name, This.fico.serialize_config)
@@ -191,11 +190,11 @@ local function register_events()
     })
 
     -- Entity cloning
-    Event.register(defines.events.on_entity_cloned, onMainEntityCloned, match_main_entity)
-    Event.register(defines.events.on_entity_cloned, onInternalEntityCloned, match_internal_entities)
+    Event.register(defines.events.on_entity_cloned, on_entity_cloned, match_main_entity)
+    Event.register(defines.events.on_entity_cloned, on_internal_entity_cloned, match_internal_entities)
 
     -- Entity settings pasting
-    Event.register(defines.events.on_entity_settings_pasted, onEntitySettingsPasted, match_main_entity)
+    Event.register(defines.events.on_entity_settings_pasted, on_entity_settings_pasted, match_main_entity)
 
     -- Event ticker
     Event.on_nth_tick(31, onNthTick)

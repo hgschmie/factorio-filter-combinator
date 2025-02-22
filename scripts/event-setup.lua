@@ -20,13 +20,12 @@ local TICK_INTERVAL = 10
 ---@param event EventData.on_built_entity | EventData.on_robot_built_entity | EventData.on_space_platform_built_entity | EventData.script_raised_revive | EventData.script_raised_built
 local function on_entity_created(event)
     local entity = event and event.entity
-    if not entity then return end
+    if not (entity and entity.valid) then return end
 
     local tags = event.tags
 
     local entity_ghost = Framework.ghost_manager:findGhostForEntity(entity)
     if entity_ghost then
-        Framework.ghost_manager:deleteGhost(entity.unit_number)
         tags = tags or entity_ghost.tags
     end
 

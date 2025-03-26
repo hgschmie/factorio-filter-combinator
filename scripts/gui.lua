@@ -377,6 +377,7 @@ local function render_network_signals(gui_element, fc_entity, wires)
                         type = 'sprite',
                         style = 'framework_quality',
                         sprite = 'quality/' .. signal.signal.quality,
+                        resize_to_sprite = false,
                         enabled = true,
                     }
                 end

@@ -1,9 +1,8 @@
 ---------------------------------------------------------------------------------------------------
-Version: 3.7.2
-Date: ????
-  Bugfixes:
-    - Fix oversized quality icons on non-native displays
+Version: 3.8.0
+Date: 2025-06-12
   Changes:
+    - Use native quality rendering for GUI
 ---------------------------------------------------------------------------------------------------
 Version: 3.7.1
 Date: 2025-02-22

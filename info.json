@@ -1,6 +1,6 @@
 {
   "name": "filter-combinator-improved",
-  "version": "3.7.2",
+  "version": "3.8.0",
   "title": "Filter Combinator (Reimagined)",
   "description": "A combinator that allows the filtering of values. Reimagined version of the original filter combinator by Sil3ntSt0rm.",
   "author": "hgschmie",
@@ -8,7 +8,7 @@
   "homepage": "https://github.com/hgschmie/factorio-filter-combinator",
   "factorio_version": "2.0",
   "dependencies": [
-    "base >= 2.0.0",
+    "base >= 2.0.48",
     "(?)even-pickier-dollies",
     "(?)compaktcircuit"
   ],

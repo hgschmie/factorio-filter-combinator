@@ -367,20 +367,12 @@ local function render_network_signals(gui_element, fc_entity, wires)
                     type = 'sprite-button',
                     sprite = signal_converter:signal_to_sprite_name(signal),
                     number = signal.count,
+                    quality = signal.signal.quality,
                     style = color_map[connector_id] .. '_circuit_network_content_slot',
                     tooltip = signal_converter:signal_to_prototype(signal).localised_name,
                     elem_tooltip = signal_converter:signal_to_elem_id(signal),
                     enabled = true,
                 }
-                if signal.signal.quality and signal.signal.quality ~= 'normal' then
-                    button.add {
-                        type = 'sprite',
-                        style = 'framework_quality',
-                        sprite = 'quality/' .. signal.signal.quality,
-                        resize_to_sprite = false,
-                        enabled = true,
-                    }
-                end
                 signal_count = signal_count + 1
             end
             while (signal_count % 10) > 0 do

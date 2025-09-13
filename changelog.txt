@@ -2,6 +2,9 @@
 Version: 3.8.1
 Date: ????
   Changes:
+    - move debug setting to startup
+  Bugfixes:
+    - handle blueprint updates correctly when the blueprint is in the player library
 ---------------------------------------------------------------------------------------------------
 Version: 3.8.0
 Date: 2025-06-13

@@ -180,7 +180,7 @@ local function register_events()
     Event.on_configuration_changed(on_configuration_changed)
 
     -- manage blueprinting and copy/paste
-    Framework.blueprint:registerCallback(const.filter_combinator_name, This.fico.serialize_config)
+    Framework.blueprint:registerCallbackForNames(const.filter_combinator_name, This.fico.serialize_config)
 
     -- manage tombstones for undo/redo and dead entities
     Framework.tombstone:registerCallback(const.filter_combinator_name, {

@@ -512,7 +512,7 @@ function FiCo:create(main, config)
     assert(self:entity(entity_id) == nil)
 
     -- if true, draw all combinators and wires. For debugging
-    local comb_visible = Framework.settings:runtime_setting('debug_mode')
+    local comb_visible = Framework.settings:startup_setting('debug_mode')
 
     -- if config was passed in, use that
     config = create_config(config)

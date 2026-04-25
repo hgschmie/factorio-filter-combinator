@@ -14,7 +14,9 @@ local signal_converter = require('framework.signal_converter')
 local const = require('lib.constants')
 
 ---@class FilterCombinatorGui
-local Gui = {}
+local Gui = {
+    NAME = 'combinator-gui'
+}
 
 ----------------------------------------------------------------------------------------------------
 -- UI definition
@@ -397,7 +399,7 @@ end
 --- close the UI (button or shortcut key)
 ---@param event EventData.on_gui_click|EventData.on_gui_closed
 function Gui.onWindowClosed(event)
-    Framework.gui_manager:destroy_gui(event.player_index)
+    Framework.gui_manager:destroyGuis(event.player_index)
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -631,13 +633,13 @@ local function refresh_gui(gui, fc_entity)
                     connect = connect or (connection.origin == defines.wire_origin.player)
                     if connect then break end
                 end
-            end
 
-            connection_state[connector_id] = connect
-            wire_connection.visible = connect
-            if connect then
-                connections.caption = { 'gui-control-behavior.connected-to-network' }
-                wire_connection.caption = { ('gui-control-behavior.%s-network-id'):format(color), wire_connector.network_id }
+                connection_state[connector_id] = connect
+                wire_connection.visible = connect
+                if connect then
+                    connections.caption = { 'gui-control-behavior.connected-to-network' }
+                    wire_connection.caption = { ('gui-control-behavior.%s-network-id'):format(color), wire_connector.network_id }
+                end
             end
         end
     end
@@ -691,7 +693,7 @@ function Gui.onGuiOpened(event)
     if not player then return end
 
     -- close an eventually open gui
-    Framework.gui_manager:destroy_gui(event.player_index)
+    Framework.gui_manager:destroyGuis(event.player_index)
 
     local entity = event and event.entity --[[@as LuaEntity]]
     if not entity then
@@ -717,8 +719,8 @@ function Gui.onGuiOpened(event)
         last_connection_state = nil,
     }
 
-    local gui = Framework.gui_manager:create_gui {
-        type = 'combinator-gui',
+    local gui = Framework.gui_manager:createGui {
+        type = Gui.NAME,
         player_index = event.player_index,
         parent = player.gui.screen,
         ui_tree_provider = Gui.getUi,
@@ -742,7 +744,7 @@ end
 ----------------------------------------------------------------------------------------------------
 
 local function init_gui()
-    Framework.gui_manager:register_gui_type('combinator-gui', get_gui_event_definition())
+    Framework.gui_manager:registerGuiType(Gui.NAME, get_gui_event_definition())
 
     local match_main_entity = Matchers:matchEventEntityName(const.filter_combinator_name)
     local match_ghost_main_entity = Matchers:matchEventEntityGhostName(const.filter_combinator_name)

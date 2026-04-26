@@ -80,6 +80,7 @@ function Gui.getUi(gui)
                         hovered_sprite = 'utility/close_black',
                         clicked_sprite = 'utility/close_black',
                         mouse_button_filter = { 'left' },
+                        tooltip = { 'gui.close-instruction' },
                         handler = { [defines.events.on_gui_click] = gui_events.onWindowClosed },
                     },
                 },
@@ -562,31 +563,31 @@ end
 local function update_gui(gui, connection_state, fc_entity)
     local fc_config = fc_entity.config
 
-    local on_off = gui:find_element('on-off')
+    local on_off = gui:findElement('on-off')
     on_off.switch_state = values_on_off[fc_config.enabled]
 
-    local incl_excl = gui:find_element('incl-excl')
+    local incl_excl = gui:findElement('incl-excl')
     incl_excl.switch_state = values_incl_excl[fc_config.include_mode]
 
-    local mode_wire = gui:find_element('mode-wire')
+    local mode_wire = gui:findElement('mode-wire')
     mode_wire.state = fc_config.use_wire
 
-    local wire_select = gui:find_element('wire-select')
+    local wire_select = gui:findElement('wire-select')
     wire_select.visible = fc_config.use_wire
 
-    local item_grid = gui:find_element('item-grid')
+    local item_grid = gui:findElement('item-grid')
     item_grid.visible = not fc_config.use_wire
-    local item_grid_label = gui:find_element('item-grid-label')
+    local item_grid_label = gui:findElement('item-grid-label')
     item_grid_label.visible = not fc_config.use_wire
 
-    local red_wire = gui:find_element('red-wire-indicator')
+    local red_wire = gui:findElement('red-wire-indicator')
     red_wire.state = fc_config.filter_wire == defines.wire_type.red
 
-    local green_wire = gui:find_element('green-wire-indicator')
+    local green_wire = gui:findElement('green-wire-indicator')
     green_wire.state = fc_config.filter_wire == defines.wire_type.green
 
     local slot_buttons = make_grid_buttons(gui, fc_entity)
-    gui:replace_children('signals', slot_buttons)
+    gui:replaceChildren('signals', slot_buttons)
 end
 
 ---@param gui framework.gui
@@ -599,25 +600,25 @@ local function refresh_gui(gui, fc_entity)
         or fc_config.status                                                          -- if enabled, the registered state takes precedence if present
         or defines.entity_status.working                                             -- otherwise, it is working
 
-    local lamp = gui:find_element('status-lamp')
+    local lamp = gui:findElement('status-lamp')
     lamp.sprite = tools.STATUS_SPRITES[entity_status]
 
-    local status = gui:find_element('status-label')
+    local status = gui:findElement('status-label')
     status.caption = { tools.STATUS_NAMES[entity_status] }
 
     -- render input signals
-    local input_signals = gui:find_element('input-signal-view')
+    local input_signals = gui:findElement('input-signal-view')
     render_network_signals(input_signals, fc_entity, { defines.wire_connector_id.combinator_input_green, defines.wire_connector_id.combinator_input_red })
 
     -- render output signals
-    local output_signals = gui:find_element('output-signal-view')
+    local output_signals = gui:findElement('output-signal-view')
     render_network_signals(output_signals, fc_entity, { defines.wire_connector_id.combinator_output_green, defines.wire_connector_id.combinator_output_red })
 
     local connection_state = {}
 
     -- render network ids for Input/Output network header
     for _, pin in pairs { 'input', 'output' } do
-        local connections = gui:find_element('connections_' .. pin)
+        local connections = gui:findElement('connections_' .. pin)
         connections.caption = { 'gui-control-behavior.not-connected' }
         for _, color in pairs { 'red', 'green' } do
             local pin_name = ('combinator_%s_%s'):format(pin, color)
@@ -626,7 +627,7 @@ local function refresh_gui(gui, fc_entity)
             local wire_connector = fc_entity.main.get_wire_connector(connector_id, false)
             local connect = false
 
-            local wire_connection = gui:find_element(pin_name)
+            local wire_connection = gui:findElement(pin_name)
             wire_connection.caption = nil
 
             if wire_connector then

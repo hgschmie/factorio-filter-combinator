@@ -398,8 +398,9 @@ end
 
 --- close the UI (button or shortcut key)
 ---@param event EventData.on_gui_click|EventData.on_gui_closed
-function Gui.onWindowClosed(event)
-    Framework.gui_manager:destroyGuis(event.player_index)
+---@param gui framework.gui
+function Gui.onWindowClosed(event, gui)
+    Framework.gui_manager:destroyGui(event.player_index, gui.type)
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -691,9 +692,6 @@ end
 function Gui.onGuiOpened(event)
     local player = Player.get(event.player_index)
     if not player then return end
-
-    -- close an eventually open gui
-    Framework.gui_manager:destroyGuis(event.player_index)
 
     local entity = event and event.entity --[[@as LuaEntity]]
     if not entity then

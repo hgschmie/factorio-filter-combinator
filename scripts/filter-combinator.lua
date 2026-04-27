@@ -3,7 +3,6 @@
 ------------------------------------------------------------------------
 assert(script)
 
-local Is = require('stdlib.utils.is')
 local table = require('stdlib.utils.table')
 local tools = require('framework.tools')
 
@@ -93,7 +92,7 @@ function FiCo:setEntity(entity_id, fc_entity)
         or (fc_entity == nil and storage.fc_data.fc[entity_id] ~= nil))
 
     if (fc_entity) then
-        assert(Is.Valid(fc_entity.main) and fc_entity.main.unit_number == entity_id)
+        assert((fc_entity.main and fc_entity.main.valid) and fc_entity.main.unit_number == entity_id)
     end
 
     storage.fc_data.fc[entity_id] = fc_entity
@@ -112,7 +111,7 @@ end
 ---@param control LuaConstantCombinatorControlBehavior
 ---@param filters LogisticFilter[]
 local function assign_filters(control, filters)
-    for i = 1, control.sections_count, 1 do
+    for i = control.sections_count, 1, -1 do
         control.remove_section(i)
     end
 
@@ -403,16 +402,20 @@ local function configure_dc(fc_entity, dc_config)
     dc_control_behavior.set_output(1, output)
 end
 
---- Rewires a FC to match its configuration. Must be called after every configuration
---- change.
+--- Rewires a FC to match its configuration. Must be called after every configuration change.
+--- If a second parameter is passed in, it will be set as the config and then the FiCo is reconfigured.
 ---@param fc_entity FilterCombinatorData
 ---@param fc_config FilterCombinatorConfig?
 function FiCo:reconfigure(fc_entity, fc_config)
     if not fc_entity then return end
 
-    fc_config = fc_config and util.copy(fc_config) or fc_entity.config
+    if fc_config then
+        local old_config = fc_entity.config
+        fc_entity.config = tools.copy(fc_config)
+        fc_entity.config.status = old_config.status
+    end
 
-    local enabled = fc_config.enabled and tools.STATUS_TABLE[fc_entity.config.status] ~= 'RED'
+    local enabled = fc_entity.config.enabled and tools.STATUS_TABLE[fc_entity.config.status] ~= 'RED'
 
     -- disconnect all wires
     for _, name in pairs { 'enable', 'no_wire', 'red_wire', 'green_wire', } do
@@ -428,7 +431,7 @@ function FiCo:reconfigure(fc_entity, fc_config)
     if not enabled then return end
 
     -- setup the signals in the signal_control cc
-    assign_filters(signals_control_behavior, fc_config.filters)
+    assign_filters(signals_control_behavior, fc_entity.config.filters)
 
     -- enabled. Connect the wires for enabling
     for _, cfg in pairs(wiring.enable) do
@@ -437,8 +440,8 @@ function FiCo:reconfigure(fc_entity, fc_config)
 
     -- rewiring for internal settings / green wire / red wire
     local rewire_cfg = 'no_wire'
-    if fc_config.use_wire then
-        rewire_cfg = fc_config.filter_wire == defines.wire_type.red and 'red_wire' or 'green_wire'
+    if fc_entity.config.use_wire then
+        rewire_cfg = fc_entity.config.filter_wire == defines.wire_type.red and 'red_wire' or 'green_wire'
     end
 
     for _, cfg in pairs(wiring[rewire_cfg]) do
@@ -446,7 +449,7 @@ function FiCo:reconfigure(fc_entity, fc_config)
     end
 
     -- control include/exclude
-    local dc_cfg = fc_config.include_mode and 'include' or 'exclude'
+    local dc_cfg = fc_entity.config.include_mode and 'include' or 'exclude'
     for _, behavior in pairs(dc_config[dc_cfg]) do
         configure_dc(fc_entity, behavior)
     end
@@ -473,7 +476,7 @@ function FiCo:create_sub_entities(fc_entity)
 
     local signals_control_behavior = fc_entity.ref.signals.get_or_create_control_behavior() --[[@as LuaConstantCombinatorControlBehavior]]
     assert(signals_control_behavior)
-    for i = 1, signals_control_behavior.sections_count, 1 do
+    for i = signals_control_behavior.sections_count, 1, -1 do
         signals_control_behavior.remove_section(i)
     end
 
@@ -505,7 +508,7 @@ end
 ---@param main LuaEntity
 ---@param config FilterCombinatorConfig?
 function FiCo:create(main, config)
-    if not Is.Valid(main) then return end
+    if not (main and main.valid) then return end
 
     local entity_id = main.unit_number --[[@as integer]]
 
@@ -540,7 +543,7 @@ end
 ---@param entity_id integer main unit number (== entity id)
 ---@return boolean true if an entity was actually destroyed
 function FiCo:destroy(entity_id)
-    assert(Is.Number(entity_id))
+    assert(entity_id and type(entity_id) == 'number')
 
     local fc_entity = self:entity(entity_id)
     if not fc_entity then return false end
@@ -560,7 +563,7 @@ end
 ---@param entity LuaEntity
 ---@return table<string, any>?
 function FiCo.serialize_config(entity)
-    if not Is.Valid(entity) then return end
+    if not (entity and entity.valid) then return end
 
     local fico_entity = This.fico:entity(entity.unit_number)
     if not fico_entity then return end
@@ -581,7 +584,7 @@ function FiCo:tick(fc_entity)
     if not fc_entity then return end
 
     -- update status based on the main entity
-    if not Is.Valid(fc_entity.main) then
+    if not (fc_entity.main and fc_entity.main.valid) then
         fc_entity.config.enabled = false
         fc_entity.config.status = defines.entity_status.marked_for_deconstruction
     else

@@ -2,6 +2,9 @@
 Version: 3.8.2
 Date: ????
   Changes:
+   - some minor correctness changes (assignments, clearing of fields, typos etc)
+   - fix copying configuration when GUI is open
+   - make background update job more efficient.
 ---------------------------------------------------------------------------------------------------
 Version: 3.8.1
 Date: 2025-09-13

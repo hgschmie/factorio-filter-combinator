@@ -100,7 +100,6 @@ cc.flags = combinator_flags
 cc.hidden = true
 cc.hidden_in_factoriopedia = true
 cc.minable = nil
-cc.selection_box = nil
 cc.selectable_in_game = false
 
 -- PrototypeBase

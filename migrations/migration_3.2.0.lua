@@ -22,7 +22,7 @@ for main_unit_number, fc_entity in pairs(This.fico:entities()) do
             for _, signal in pairs(fc_entity.config.signals) do
                 if signal.signal then
                     -- only add signals that actually exist
-                    local type = signal.signal.type == 'virtual' and 'virtual_signal' or signal.type
+                    local type = signal.signal.type == 'virtual' and 'virtual_signal' or signal.signal.type
                     if prototypes[type][signal.name] then
                         ---@type LogisticFilter
                         local filter = {

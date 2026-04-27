@@ -42,7 +42,6 @@ local function on_entity_deleted(event)
 
     if This.fico:destroy(entity.unit_number) then
         Framework.gui_manager:destroyGuiByEntityId(entity.unit_number)
-        storage.last_tick_entity = nil
     end
 end
 
@@ -54,7 +53,6 @@ end
 local function on_object_destroyed(event)
     -- main entity destroyed
     if This.fico:destroy(event.useful_id) then
-        storage.last_tick_entity = nil
         Framework.gui_manager:destroyGuiByEntityId(event.useful_id)
     end
 end
@@ -132,6 +130,7 @@ local function onNthTick()
     local entities = This.fico:entities()
     local process_count = math.ceil(table_size(entities) / interval)
     local index = storage.last_tick_entity
+    if index and not entities[index] then index = nil end
 
     if process_count > 0 then
         local fc_entity

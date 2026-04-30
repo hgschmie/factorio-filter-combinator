@@ -15,7 +15,24 @@
   "package": {
     "git_publish_branch": "main",
     "readme": ".portal/README",
-    "gallery": [ ".portal/gallery_1.png",".portal/gallery_2.png",".portal/gallery_3.png" ],
-    "sync_portal_details": true
+    "gallery": [
+      ".portal/gallery_1.png",
+      ".portal/gallery_2.png",
+      ".portal/gallery_3.png"
+    ],
+    "sync_portal_details": true,
+    "ignore": [
+      "claude-issues.md",
+      ".claude/*",
+      "portal/*",
+      "releases/*",
+      "**/*.xcf",
+      "**/.zip",
+      ".git",
+      ".gitattributes",
+      ".gitignore",
+      ".vscode",
+      ".DS_Store"
+    ]
   }
 }

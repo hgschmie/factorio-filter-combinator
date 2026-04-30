@@ -2,6 +2,8 @@
 -- Prototypes for all internal combinators, both regular and debug mode
 ------------------------------------------------------------------------
 
+local util = require('util')
+
 local const = require('lib.constants')
 
 local collision_mask_util = require('collision-mask-util')

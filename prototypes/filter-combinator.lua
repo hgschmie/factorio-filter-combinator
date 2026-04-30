@@ -2,6 +2,8 @@
 -- Prototype for the actual filter combinator
 ------------------------------------------------------------------------
 
+local util = require('util')
+
 local const = require('lib.constants')
 
 local function update_sprite(sprite, filename, x, y)

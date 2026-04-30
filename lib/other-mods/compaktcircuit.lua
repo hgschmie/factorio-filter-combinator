@@ -2,6 +2,8 @@
 -- CompactCircuit (https://mods.factorio.com/mod/compaktcircuit) support
 --------------------------------------------------------------------------------
 
+local util = require('util')
+
 local const = require('lib.constants')
 local Is = require('stdlib.utils.is')
 

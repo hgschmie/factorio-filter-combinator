@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 3.8.2
-Date: ????
+Date: 2026-04-29
   Changes:
    - some minor correctness changes (assignments, clearing of fields, typos etc)
    - fix copying configuration when GUI is open

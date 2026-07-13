@@ -110,14 +110,18 @@ cc.selectable_in_game = false
 local debug_ac = util.copy(data.raw['arithmetic-combinator']['arithmetic-combinator']) --[[@as data.ArithmeticCombinatorPrototype]]
 debug_ac.name = const.internal_debug_ac_name
 debug_ac.hidden_in_factoriopedia = true
+debug_ac.draw_circuit_wires = true
+
 
 local debug_cc = util.copy(data.raw['constant-combinator']['constant-combinator']) --[[@as data.ConstantCombinatorPrototype]]
 debug_cc.name = const.internal_debug_cc_name
 debug_cc.hidden_in_factoriopedia = true
+debug_cc.draw_circuit_wires = true
 
 local debug_dc = util.copy(data.raw['decider-combinator']['decider-combinator']) --[[@as data.DeciderCombinatorPrototype]]
 debug_dc.name = const.internal_debug_dc_name
 debug_dc.hidden_in_factoriopedia = true
+debug_dc.draw_circuit_wires = true
 
 local tint = { r = 0, g = 0.8, b = 0.6, a = 1}
 for _, directions in pairs({'north', 'south','east','west'}) do

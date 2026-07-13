@@ -141,8 +141,7 @@ local function assign_filters(control, filters)
             local pos = index % 1000 + 1
             section.set_slot(pos, filter)
         else
-            local section = control.sections[math.floor(index / 1000) + 1]
-            assert(section)
+            local section = assert(control.sections[math.floor(index / 1000) + 1])
 
             local pos = index % 1000 + 1
             filter.min = filter.min + section.filters[pos].min
@@ -179,8 +178,6 @@ local function connect_wire(fc_entity, wire_cfg, wire_type)
     local wire = wire_type[wire_cfg.wire or 'red']
     local wire_name = invert_table[wire]
 
-    local wire_origin = defines.wire_origin[fc_entity.comb_visible and 'player' or 'script']
-
     assert(fc_entity.ref[wire_cfg.src])
     assert(fc_entity.ref[wire_cfg.dst])
 
@@ -188,7 +185,7 @@ local function connect_wire(fc_entity, wire_cfg, wire_type)
     local dst_connector = fc_entity.ref[wire_cfg.dst].get_wire_connector(get_wire_name(wire_cfg.dst_circuit, wire_name), false)
 
     if src_connector and dst_connector then
-        assert(src_connector.connect_to(dst_connector, false, wire_origin))
+        src_connector.connect_to(dst_connector, false, defines.wire_origin.script)
     end
 end
 
@@ -198,26 +195,21 @@ local function disconnect_wire(fc_entity, wire_cfg)
     local wire = defines.wire_type[wire_cfg.wire or 'red']
     local wire_name = invert_table[wire]
 
-    local wire_origin = defines.wire_origin[fc_entity.comb_visible and 'player' or 'script']
-
     assert(fc_entity.ref[wire_cfg.src])
 
     if wire_cfg.dst then
         assert(fc_entity.ref[wire_cfg.dst])
     end
 
-    local src_connector = wire_cfg.src and fc_entity.ref[wire_cfg.src].get_wire_connector(get_wire_name(wire_cfg.src_circuit, wire_name), false)
-    assert(src_connector)
-
-    local dst_connector = wire_cfg.dst and fc_entity.ref[wire_cfg.dst].get_wire_connector(get_wire_name(wire_cfg.dst_circuit, wire_name), false)
+    local src_connector = assert(wire_cfg.src and fc_entity.ref[wire_cfg.src].get_wire_connector(get_wire_name(wire_cfg.src_circuit, wire_name), true))
+    local dst_connector = wire_cfg.dst and fc_entity.ref[wire_cfg.dst].get_wire_connector(get_wire_name(wire_cfg.dst_circuit, wire_name), true)
 
     if dst_connector then
-        src_connector.disconnect_from(dst_connector, wire_origin)
+        src_connector.disconnect_from(dst_connector, defines.wire_origin.script)
     else
-        src_connector.disconnect_all(wire_origin)
+        src_connector.disconnect_all(defines.wire_origin.script)
     end
 end
-
 
 -- Position grid for sub-entities if they are visible (for debugging)
 --
@@ -360,8 +352,7 @@ local function create_internal_entity(cfg)
 
     local main = fc_entity.main
 
-    ---@type LuaEntity?
-    local sub_entity = main.surface.create_entity {
+    local sub_entity = assert(main.surface.create_entity {
         name = entity_map[type],
         position = { x = main.position.x + x, y = main.position.y + y },
         direction = main.direction,
@@ -371,9 +362,7 @@ local function create_internal_entity(cfg)
         create_build_effect_smoke = false,
         spawn_decorations = false,
         move_stuck_players = true,
-    }
-
-    assert(sub_entity)
+    })
 
     sub_entity.combinator_description = desc
     sub_entity.minable = false
@@ -400,8 +389,7 @@ local function configure_dc(fc_entity, dc_config)
         networks = { red = dc_config.red_network == nil and true or dc_config.red_network, green = dc_config.green_network == nil and true or dc_config.green_network, }
     }
 
-    local dc_control_behavior = fc_entity.ref[dc_config.src].get_or_create_control_behavior() --[[@as LuaDeciderCombinatorControlBehavior]]
-    assert(dc_control_behavior)
+    local dc_control_behavior = assert(fc_entity.ref[dc_config.src].get_or_create_control_behavior()) --[[@as LuaDeciderCombinatorControlBehavior]]
     dc_control_behavior.set_condition(1, condition)
     dc_control_behavior.set_output(1, output)
 end
@@ -421,42 +409,57 @@ function FiCo:reconfigure(fc_entity, fc_config)
 
     local enabled = fc_entity.config.enabled and tools.STATUS_TABLE[fc_entity.config.status] ~= 'RED'
 
+    ---@type table<string, string>
+    local wire_state = table.array_to_dictionary(table_size(fc_entity.state.wires) > 0 and fc_entity.state.wires or
+        { 'enable', 'no_wire', 'red_wire', 'green_wire', })
+
+    ---@type table<string, boolean>
+    local wire_config = {}
+
+    if enabled then wire_config['enable'] = true end
+    if fc_entity.config.use_wire then
+        wire_config[fc_entity.config.filter_wire == defines.wire_type.red and 'red_wire' or 'green_wire'] = true
+    else
+        wire_config['no_wire'] = true
+    end
+
     -- disconnect all wires
-    for _, name in pairs { 'enable', 'no_wire', 'red_wire', 'green_wire', } do
-        for _, cfg in pairs(wiring[name]) do
-            disconnect_wire(fc_entity, cfg)
+    for name in pairs(wire_state) do
+        if not wire_config[name] then
+            for _, cfg in pairs(wiring[name]) do
+                disconnect_wire(fc_entity, cfg)
+            end
         end
     end
 
-    local signals_control_behavior = fc_entity.ref.signals.get_or_create_control_behavior() --[[@as LuaConstantCombinatorControlBehavior ]]
-    assert(signals_control_behavior)
+    for name in pairs(wire_config) do
+        for _, cfg in pairs(wiring[name]) do
+            connect_wire(fc_entity, cfg)
+        end
+    end
+
+    fc_entity.state.wires = table.keys(wire_config)
+
+    local signals_control_behavior = assert(fc_entity.ref.signals.get_or_create_control_behavior()) --[[@as LuaConstantCombinatorControlBehavior ]]
     signals_control_behavior.enabled = enabled
 
     if not enabled then return end
 
     -- setup the signals in the signal_control cc
-    assign_filters(signals_control_behavior, fc_entity.config.filters)
-
-    -- enabled. Connect the wires for enabling
-    for _, cfg in pairs(wiring.enable) do
-        connect_wire(fc_entity, cfg)
-    end
-
-    -- rewiring for internal settings / green wire / red wire
-    local rewire_cfg = 'no_wire'
-    if fc_entity.config.use_wire then
-        rewire_cfg = fc_entity.config.filter_wire == defines.wire_type.red and 'red_wire' or 'green_wire'
-    end
-
-    for _, cfg in pairs(wiring[rewire_cfg]) do
-        connect_wire(fc_entity, cfg)
+    if not table.compare(fc_entity.state.filters, fc_entity.config.filters) then
+        assign_filters(signals_control_behavior, fc_entity.config.filters)
+        fc_entity.state.filters = tools.copy(fc_entity.config.filters)
     end
 
     -- control include/exclude
     local dc_cfg = fc_entity.config.include_mode and 'include' or 'exclude'
-    for _, behavior in pairs(dc_config[dc_cfg]) do
-        configure_dc(fc_entity, behavior)
+    if dc_cfg ~= fc_entity.state.dc then
+        for _, behavior in pairs(dc_config[dc_cfg]) do
+            configure_dc(fc_entity, behavior)
+        end
     end
+
+    fc_entity.state.dc = dc_cfg
 end
 
 ------------------------------------------------------------------------
@@ -478,8 +481,7 @@ function FiCo:create_sub_entities(fc_entity)
         }
     end
 
-    local signals_control_behavior = fc_entity.ref.signals.get_or_create_control_behavior() --[[@as LuaConstantCombinatorControlBehavior]]
-    assert(signals_control_behavior)
+    local signals_control_behavior = assert(fc_entity.ref.signals.get_or_create_control_behavior()) --[[@as LuaConstantCombinatorControlBehavior]]
     for i = signals_control_behavior.sections_count, 1, -1 do
         signals_control_behavior.remove_section(i)
     end
@@ -532,6 +534,10 @@ function FiCo:create(main, config)
         comb_visible = comb_visible,
         entities = {},
         ref = { main = main },
+        state = {
+            wires = {},
+            filters = {},
+        },
     }
 
     self:create_sub_entities(fc_entity)
@@ -583,11 +589,13 @@ function FiCo.deserialize_config(tags)
     if not (tags and tags[const.config_tag_name]) then return end
 
     -- remove blueprint keys that were converted to strings
-    local fc_config = util.copy(tags[const.config_tag_name]) --[[@as FilterCombinatorConfig ]]
+    local fc_config = tools.copy(tags[const.config_tag_name]) --[[@as FilterCombinatorConfig ]]
     local filters = {}
-    for key, value in pairs(fc_config.filters) do
-        local new_key = tonumber(key)
-        if new_key then filters[new_key] = value end
+    if fc_config.filters then
+        for key, value in pairs(fc_config.filters) do
+            local new_key = tonumber(key)
+            if new_key then filters[new_key] = value end
+        end
     end
     fc_config.filters = filters
 

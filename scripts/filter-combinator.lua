@@ -565,16 +565,33 @@ end
 --------------------------------------------------------------------------------
 
 ---@param entity LuaEntity
----@return table<string, any>?
+---@return Tags?
 function FiCo.serialize_config(entity)
     if not (entity and entity.valid) then return end
 
-    local fico_entity = This.fico:entity(entity.unit_number)
+    local fico_entity = FiCo:entity(entity.unit_number)
     if not fico_entity then return end
 
     return {
         [const.config_tag_name] = fico_entity.config,
     }
+end
+
+---@param tags Tags?
+---@return FilterCombinatorConfig?
+function FiCo.deserialize_config(tags)
+    if not (tags and tags[const.config_tag_name]) then return end
+
+    -- remove blueprint keys that were converted to strings
+    local fc_config = util.copy(tags[const.config_tag_name]) --[[@as FilterCombinatorConfig ]]
+    local filters = {}
+    for key, value in pairs(fc_config.filters) do
+        local new_key = tonumber(key)
+        if new_key then filters[new_key] = value end
+    end
+    fc_config.filters = filters
+
+    return fc_config
 end
 
 ------------------------------------------------------------------------

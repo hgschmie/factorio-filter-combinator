@@ -6,12 +6,11 @@ assert(script)
 local Event = require('stdlib.event.event')
 local Position = require('stdlib.area.position')
 local Player = require('stdlib.event.player')
+local Ticker = require('framework.ticker')
 
 local Matchers = require('framework.matchers')
 
 local const = require('lib.constants')
-
-local TICK_INTERVAL = 10
 
 --------------------------------------------------------------------------------
 -- entity create / delete
@@ -22,14 +21,20 @@ local function on_entity_created(event)
     local entity = event and event.entity
     if not (entity and entity.valid) then return end
 
+    ---@type Tags?
     local tags = event.tags
 
-    local entity_ghost = Framework.ghost_manager:findGhostForEntity(entity)
+    local config = nil
+
+    -- see if a ghost (with tags) from a blueprint is replaced
+    local entity_ghost = Framework.Ghost:findGhostForEntity(entity)
     if entity_ghost then
         tags = tags or entity_ghost.tags
     end
 
-    local config = tags and tags[const.config_tag_name] --[[@as FilterCombinatorConfig ]]
+    if tags then
+        config = This.fico.deserialize_config(tags)
+    end
 
     This.fico:create(entity, config)
 end
@@ -45,15 +50,12 @@ local function on_entity_deleted(event)
     end
 end
 
---------------------------------------------------------------------------------
--- Entity destruction
---------------------------------------------------------------------------------
+---@param event EventData.on_post_entity_died
+local function on_post_entity_died(event)
+    if not (event.unit_number) then return end
 
----@param event EventData.on_object_destroyed
-local function on_object_destroyed(event)
-    -- main entity destroyed
-    if This.fico:destroy(event.useful_id) then
-        Framework.gui_manager:destroyGuiByEntityId(event.useful_id)
+    if This.fico:destroy(event.unit_number) then
+        Framework.gui_manager:destroyGuiByEntityId(event.unit_number)
     end
 end
 
@@ -95,8 +97,7 @@ end
 local function on_entity_settings_pasted(event)
     if not (event and event.source and event.source.valid and event.destination and event.destination.valid) then return end
 
-    local player = Player.get(event.player_index)
-    if not (player and player.valid and player.force == event.source.force and player.force == event.destination.force) then return end
+    if event.source.force ~= event.destination.force then return end
 
     local src_fc_entity = This.fico:entity(event.source.unit_number)
     local dst_fc_entity = This.fico:entity(event.destination.unit_number)
@@ -125,31 +126,45 @@ end
 -- Event ticker
 --------------------------------------------------------------------------------
 
-local function onNthTick()
-    local interval = TICK_INTERVAL -- fraction of the ficos to update
-    local entities = This.fico:entities()
-    local process_count = math.ceil(table_size(entities) / interval)
-    local index = storage.last_tick_entity
-    if index and not entities[index] then index = nil end
+local TICK_INTERVAL = 10
 
-    if process_count > 0 then
-        local fc_entity
-        repeat
-            index, fc_entity = next(entities, index)
-            if fc_entity then
-                if fc_entity.main and fc_entity.main.valid then
-                    This.fico:tick(fc_entity)
-                    process_count = process_count - 1
-                else
-                    This.fico:destroy(index)
-                end
-            end
-        until process_count == 0 or not index
-    else
-        index = nil
+---@param context ff2.ticker.TickerContext
+---@param values ff2.ticker.TickerContext
+local function ticker_unit_of_work(context, values)
+    local fc_index = context.index
+    local fc_entity = values.index
+
+    if fc_entity.main and fc_entity.main.valid then
+        This.fico:tick(fc_entity)
+    elseif This.fico:destroy(fc_index) then
+        Framework.gui_manager:destroyGuiByEntityId(fc_index)
+    end
+end
+
+local function on_tick()
+    local ticker_info = Ticker.getTicker(const.filter_combinator_name)
+
+    local fc_storage = This:storage()
+    if fc_storage.count == 0 then return end
+
+    local entities_per_tick = math.max(1, math.ceil(fc_storage.count / TICK_INTERVAL)) -- at least one
+
+    local context = ticker_info.context or {}
+
+    local iterator = Ticker.createWorkIterator {
+        context = context,
+        field_name = 'index',
+        iterable = fc_storage.fc,
+    }
+
+    while entities_per_tick > 0 do
+        iterator.process(ticker_unit_of_work)
+
+        entities_per_tick = entities_per_tick - 1
     end
 
-    storage.last_tick_entity = index
+    ticker_info.context = context
+    ticker_info.last_tick = game.tick
 end
 
 --------------------------------------------------------------------------------
@@ -168,12 +183,13 @@ local function register_events()
     -- entity create / delete
     Event.register(Matchers.CREATION_EVENTS, on_entity_created, match_all_main_entities)
     Event.register(Matchers.DELETION_EVENTS, on_entity_deleted, match_all_main_entities)
+    -- register post_died to deal with dead entities
+    Event.register(defines.events.on_post_entity_died, on_post_entity_died)
 
     -- manage ghost building (robot building)
-    Framework.ghost_manager:registerForName(const.filter_combinator_name)
-
-    -- entity destroy (can't filter on that)
-    Event.register(defines.events.on_object_destroyed, on_object_destroyed)
+    Framework.Ghost:registerForName {
+        names = const.filter_combinator_name
+    }
 
     -- Configuration changes (startup)
     Event.on_configuration_changed(on_configuration_changed)
@@ -182,9 +198,9 @@ local function register_events()
     Framework.blueprint:registerCallbackForNames(const.filter_combinator_name, This.fico.serialize_config)
 
     -- manage tombstones for undo/redo and dead entities
-    Framework.tombstone:registerCallback(const.filter_combinator_name, {
+    Framework.Tombstone:registerCallback(const.filter_combinator_name, {
         create_tombstone = This.fico.serialize_config,
-        apply_tombstone = Framework.ghost_manager.mapTombstoneToGhostTags,
+        apply_tombstone = Framework.Ghost.mapTombstoneToGhostTags,
     })
 
     -- Entity cloning
@@ -195,7 +211,7 @@ local function register_events()
     Event.register(defines.events.on_entity_settings_pasted, on_entity_settings_pasted, match_main_entity)
 
     -- Event ticker
-    Event.on_nth_tick(31, onNthTick)
+    Event.on_nth_tick(1, on_tick)
 end
 
 --------------------------------------------------------------------------------

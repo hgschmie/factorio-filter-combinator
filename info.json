@@ -1,6 +1,6 @@
 {
   "name": "filter-combinator-improved",
-  "version": "3.8.4",
+  "version": "3.9.0",
   "title": "Filter Combinator (Reimagined)",
   "description": "A combinator that allows the filtering of values. Reimagined version of the original filter combinator by Sil3ntSt0rm.",
   "author": "hgschmie",
@@ -13,7 +13,7 @@
     "(?)compaktcircuit"
   ],
   "package": {
-    "git_publish_branch": "main",
+    "git_publish_branch": "2.0-maint",
     "readme": ".portal/README",
     "gallery": [
       ".portal/gallery_1.png",

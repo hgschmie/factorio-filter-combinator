@@ -365,7 +365,7 @@ local function create_internal_entity(cfg)
     })
 
     sub_entity.combinator_description = desc
-    sub_entity.minable = false
+    sub_entity.minable_flag = false
     sub_entity.destructible = false
     sub_entity.operable = comb_visible -- for debugging
 

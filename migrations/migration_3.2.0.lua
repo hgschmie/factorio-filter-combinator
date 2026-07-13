@@ -1,7 +1,4 @@
-require('lib.init')
-local const = require('lib.constants')
-
-if storage.fc_data and storage.fc_data.VERSION >= const.current_version then return end
+This, Framework = require('lib.init')()
 
 for main_unit_number, fc_entity in pairs(This.fico:entities()) do
     if not fc_entity.ref.main.valid then
@@ -33,6 +30,7 @@ for main_unit_number, fc_entity in pairs(This.fico:entities()) do
                     end
                 end
             end
+            ---@diagnostic disable-next-line: inject-field
             fc_entity.config.signals = nil
             fc_entity.config.filters = filters
         end
@@ -46,5 +44,3 @@ for main_unit_number, fc_entity in pairs(This.fico:entities()) do
 end
 
 storage.all_signals = nil
-
-storage.fc_data.VERSION = const.current_version

@@ -2,13 +2,15 @@
 Version: 3.8.3
 Date: ????
   Changes:
+    - update mod code to the current framework; restores the exported remote interface (get_config/set_config) and CompactCircuit integration
+    - move Picker Dollies / Even Pickier Dollies support to the framework remote-apis mechanism
 ---------------------------------------------------------------------------------------------------
 Version: 3.8.2
 Date: 2026-04-29
   Changes:
-   - some minor correctness changes (assignments, clearing of fields, typos etc)
-   - fix copying configuration when GUI is open
-   - make background update job more efficient.
+    - some minor correctness changes (assignments, clearing of fields, typos etc)
+    - fix copying configuration when GUI is open
+    - make background update job more efficient.
 ---------------------------------------------------------------------------------------------------
 Version: 3.8.1
 Date: 2025-09-13

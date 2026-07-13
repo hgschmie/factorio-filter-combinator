@@ -111,7 +111,7 @@ end
 --------------------------------------------------------------------------------
 
 local function on_configuration_changed()
-    This.fico:init()
+    This:init()
 
     -- enable filter combinator if circuit network is researched.
     for _, force in pairs(game.forces) do
@@ -203,7 +203,8 @@ end
 --------------------------------------------------------------------------------
 
 local function on_init()
-    This.fico:init()
+    This:init()
+
     register_events()
 end
 

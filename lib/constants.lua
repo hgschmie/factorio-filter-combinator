@@ -10,9 +10,6 @@ local Constants = {}
 -- main constants
 --------------------------------------------------------------------------------
 
--- the current version that is the result of the latest migration
-Constants.current_version = 10
-
 Constants.prefix = 'hps__fc-'
 Constants.name = 'filter-combinator'
 Constants.name_packed = Constants.name .. '-packed' -- for compakt circuits
@@ -33,8 +30,8 @@ function Constants.framework_init()
         name = Constants.name,
         -- The filesystem root.
         root = Constants.root,
-        -- Remote interface name
-        remote_name = Constants.filter_combinator_name,
+        -- Exported remote interface name
+        exported_api_name = Constants.filter_combinator_name,
     }
 end
 

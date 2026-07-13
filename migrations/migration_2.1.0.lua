@@ -1,4 +1,5 @@
-require('lib.init')
+This, Framework = require('lib.init')()
+
 local const = require('lib.constants')
 
 ------------------------------------------------------------------------

@@ -4,16 +4,20 @@
 ----------------------------------------------------------------------------------------------------
 
 ----------------------------------------------------------------------------------------------------
---
+-- this.lua
 ----------------------------------------------------------------------------------------------------
+
+---@class fico.Storage
+---@field fc FilterCombinatorData[]
+---@field count integer
 
 ----------------------------------------------------------------------------------------------------
 -- filter-combinator.lua
 ----------------------------------------------------------------------------------------------------
 
---- @class FilterCombinatorData
---- @field main LuaEntity
---- @field config FilterCombinatorConfig
---- @field comb_visible boolean
---- @field entities LuaEntity[]
---- @field ref table<string, LuaEntity>
+---@class FilterCombinatorData
+---@field main LuaEntity
+---@field config FilterCombinatorConfig
+---@field comb_visible boolean
+---@field entities LuaEntity[]
+---@field ref table<string, LuaEntity>

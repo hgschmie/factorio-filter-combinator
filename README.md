@@ -63,11 +63,11 @@ exception.
 
 Full code base:
 
-Copyright (C) 2024 Henning Schmiedehausen, licensed under the [MS-RL](https://opensource.org/licenses/MS-RL) license.
+Copyright (C) 2024-2026 Henning Schmiedehausen, licensed under the [MS-RL](https://opensource.org/licenses/MS-RL) license.
 
 The contents of the framework and the stdlib folder:
 
-Copyright (C) 2024 Henning Schmiedehausen, licensed under the MIT license or the MS-RL license.
+Copyright (C) 2024-2026 Henning Schmiedehausen, licensed under the MIT license or the MS-RL license.
 
 
 --------------------------------------------------

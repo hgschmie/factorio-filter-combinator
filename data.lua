@@ -2,7 +2,7 @@
 -- data phase 1
 ------------------------------------------------------------------------
 
-require('lib.init')
+This, Framework = require('lib.init')()
 
 local util = require('util')
 
@@ -32,6 +32,5 @@ data:extend { item, recipe }
 
 table.insert(data.raw['technology']['circuit-network'].effects, { type = 'unlock-recipe', recipe = const.filter_combinator_name })
 
-------------------------------------------------------------------------
 ---@diagnostic disable-next-line: undefined-field
 Framework.post_data_stage()

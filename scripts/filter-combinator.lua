@@ -46,19 +46,21 @@ local function create_config(parent_config)
     return config
 end
 
-------------------------------------------------------------------------
--- init setup
-------------------------------------------------------------------------
+---@param entity_id integer
+---@return FilterCombinatorConfig? config
+function FiCo.getConfig(entity_id)
+    local fc_entity = FiCo:entity(entity_id)
+    if not fc_entity then return nil end
+    return fc_entity.config
+end
 
---- Setup the global fico data structure.
-function FiCo:init()
-    if storage.fc_data then return end
-
-    storage.fc_data = {
-        fc = {},
-        count = 0,
-        VERSION = const.current_version,
-    }
+---@param entity_id integer
+---@param config FilterCombinatorConfig
+function FiCo.setConfig(entity_id, config)
+    local fc_entity = FiCo:entity(entity_id)
+    if not fc_entity then return end
+    fc_entity.config = tools.copy(config)
+    FiCo:reconfigure(fc_entity)
 end
 
 ------------------------------------------------------------------------
@@ -68,39 +70,41 @@ end
 --- Returns the registered total count
 ---@return integer count The total count of filter combinators
 function FiCo:totalCount()
-    return storage.fc_data.count
+    return This:storage().count
 end
 
 --- Returns data for all filter combinators.
 ---@return FilterCombinatorData[] entities
 function FiCo:entities()
-    return storage.fc_data.fc
+    return This:storage().fc
 end
 
 --- Returns data for a given filter combinator
 ---@param entity_id integer main unit number (== entity id)
 ---@return FilterCombinatorData? entity
 function FiCo:entity(entity_id)
-    return storage.fc_data.fc[entity_id]
+    return This:storage().fc[entity_id]
 end
 
 --- Sets or clears a filter combinator entity
 ---@param entity_id integer The unit_number of the primary
 ---@param fc_entity FilterCombinatorData?
 function FiCo:setEntity(entity_id, fc_entity)
-    assert((fc_entity ~= nil and storage.fc_data.fc[entity_id] == nil)
-        or (fc_entity == nil and storage.fc_data.fc[entity_id] ~= nil))
+    local fc_storage = This:storage()
+
+    assert((fc_entity ~= nil and fc_storage.fc[entity_id] == nil)
+        or (fc_entity == nil and fc_storage.fc[entity_id] ~= nil))
 
     if (fc_entity) then
         assert((fc_entity.main and fc_entity.main.valid) and fc_entity.main.unit_number == entity_id)
     end
 
-    storage.fc_data.fc[entity_id] = fc_entity
-    storage.fc_data.count = storage.fc_data.count + ((fc_entity and 1) or -1)
+    fc_storage.fc[entity_id] = fc_entity
+    fc_storage.count = fc_storage.count + ((fc_entity and 1) or -1)
 
-    if storage.fc_data.count < 0 then
-        storage.fc_data.count = table_size(storage.fc_data.fc)
-        Framework.logger:logf('Filter Combinator count got negative (bug), size is now: %d', storage.fc_data.count)
+    if fc_storage.count < 0 then
+        fc_storage.count = table_size(fc_storage.fc)
+        Framework.logger:logf('Filter Combinator count got negative (bug), size is now: %d', fc_storage.count)
     end
 end
 

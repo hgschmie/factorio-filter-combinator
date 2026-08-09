@@ -10,7 +10,8 @@
   "dependencies": [
     "base >= 2.1.7",
     "(?)even-pickier-dollies",
-    "(?)compaktcircuit"
+    "(?)compaktcircuit",
+    "(?)compaktcircuit-factorio21"
   ],
   "package": {
     "git_publish_branch": "main",

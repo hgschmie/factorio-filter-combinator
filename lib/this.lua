@@ -10,6 +10,7 @@
 local This = {
     other_mods = {
         compaktcircuit = 'compaktcircuit',
+        ['compaktcircuit-factorio21'] = 'compaktcircuit',
     },
     remote_apis = {
         compaktcircuit = 'compaktcircuit',

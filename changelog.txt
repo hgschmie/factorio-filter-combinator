@@ -2,6 +2,7 @@
 Version: 4.0.1
 Date: ????
   Changes:
+    - support factorio 2.1 fork of Compact Circuits as well
 ---------------------------------------------------------------------------------------------------
 Version: 4.0.0
 Date: 2026-07-13

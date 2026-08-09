@@ -2,7 +2,7 @@ This, Framework = require('lib.init')()
 
 -- explicitly remove group information from control sections
 for _, fc_entity in pairs(This.fico:entities()) do
-    if fc_entity.ref.signals then
+    if fc_entity.ref.signals and fc_entity.ref.signals.valid then
         local control_behavior = fc_entity.ref.signals.get_or_create_control_behavior() --[[@as LuaConstantCombinatorControlBehavior ]]
         if control_behavior then
             for i = 1, control_behavior.sections_count, 1 do

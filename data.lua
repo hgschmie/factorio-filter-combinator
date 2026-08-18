@@ -12,6 +12,7 @@ local const = require('lib.constants')
 
 require('prototypes.internal-combinators')
 require('prototypes.filter-combinator')
+require('prototypes.custom-input')
 
 ------------------------------------------------------------------------
 

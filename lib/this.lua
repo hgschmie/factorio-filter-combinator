@@ -7,6 +7,7 @@
 ---@field remote_apis table<string, string>
 ---@field fico FilterCombinator
 ---@field gui FilterCombinatorGui?
+---@field desc_gui FilterCombinatorDescGui?
 local This = {
     other_mods = {
         compaktcircuit = 'compaktcircuit',
@@ -21,6 +22,7 @@ local This = {
 if script then
     This.fico = require('scripts.filter-combinator')
     This.gui = require('scripts.gui') --[[@as FilterCombinatorGui ]]
+    This.desc_gui = require('scripts.desc-gui') --[[@as FilterCombinatorDescGui ]]
 
     if Framework.ExportedApis then
         -- use get_config(entity_id) to retrieve configuration

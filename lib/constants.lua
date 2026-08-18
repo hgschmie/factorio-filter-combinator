@@ -106,4 +106,12 @@ Constants.internal_entity_names = {
 }
 
 --------------------------------------------------------------------------------
+-- GUI input handling
+--------------------------------------------------------------------------------
+
+Constants.custom_input_toggle_menu = Constants:with_prefix('toggle-menu')
+Constants.custom_input_confirm_gui = Constants:with_prefix('confirm-gui')
+Constants.custom_input_ignore_close = Constants:with_prefix('ignore-close')
+
+--------------------------------------------------------------------------------
 return Constants

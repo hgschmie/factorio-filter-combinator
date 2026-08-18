@@ -29,6 +29,7 @@ local function get_gui_event_definition()
     return {
         events = {
             onWindowClosed = Gui.onWindowClosed,
+            onEditDescription = Gui.onEditDescription,
             onSwitchEnabled = Gui.onSwitchEnabled,
             onSwitchExclusive = Gui.onSwitchExclusive,
             onSwitchGreenWire = Gui.onSwitchGreenWire,
@@ -37,6 +38,14 @@ local function get_gui_event_definition()
             onSelectSignal = Gui.onSelectSignal,
         },
         callback = Gui.guiUpdater,
+        custominput_events = {
+            [defines.events.on_gui_closed] = {
+                [const.custom_input_confirm_gui] = Gui.onWindowClosed,
+                [const.custom_input_toggle_menu] = Gui.onWindowClosed,
+                -- Synthetic event used while transferring player.opened to the description GUI.
+                [const.custom_input_ignore_close] = function() end,
+            },
+        },
     }
 end
 
@@ -48,6 +57,9 @@ function Gui.getUi(gui)
 
     local fc_entity = This.fico:entity(gui.entity_id)
     assert(fc_entity)
+
+    local description = fc_entity.main.combinator_description
+    local has_description = description ~= ''
 
     return {
         type = 'frame',
@@ -333,6 +345,59 @@ function Gui.getUi(gui)
                                     },
                                 },
                             },
+                            {
+                                type = 'line',
+                            },
+                            {
+                                type = 'button',
+                                name = 'add-description',
+                                caption = { 'gui-edit-label.add-description' },
+                                visible = not has_description,
+                                mouse_button_filter = { 'left' },
+                                elem_mods = { auto_toggle = true },
+                                handler = { [defines.events.on_gui_click] = gui_events.onEditDescription },
+                            },
+                            {
+                                type = 'flow',
+                                name = 'description-view',
+                                direction = 'vertical',
+                                visible = has_description,
+                                children = {
+                                    {
+                                        type = 'flow',
+                                        direction = 'horizontal',
+                                        style_mods = { vertical_align = 'center' },
+                                        children = {
+                                            {
+                                                type = 'label',
+                                                style = 'semibold_label',
+                                                caption = { 'gui-mod-info.description' },
+                                            },
+                                            {
+                                                type = 'sprite-button',
+                                                name = 'edit-description',
+                                                style = 'mini_button_aligned_to_text_vertically_when_centered',
+                                                sprite = 'utility/rename_icon',
+                                                tooltip = { 'gui-edit-label.edit-description' },
+                                                mouse_button_filter = { 'left' },
+                                                elem_mods = { auto_toggle = true },
+                                                handler = { [defines.events.on_gui_click] = gui_events.onEditDescription },
+                                            },
+                                        },
+                                    },
+                                    {
+                                        type = 'label',
+                                        name = 'description-text',
+                                        caption = description,
+                                        style_mods = {
+                                            -- single_line is a LabelStyle property, not a gui element add parameter
+                                            single_line = false,
+                                            horizontally_stretchable = true,
+                                            horizontally_squashable = true,
+                                        },
+                                    },
+                                },
+                            },
                         },
                     },
                 },
@@ -404,6 +469,29 @@ function Gui.onWindowClosed(event, gui)
     local fc_entity = This.fico:entity(gui.entity_id)
     if fc_entity then This.fico:reconfigure(fc_entity) end
     Framework.gui_manager:destroyGui(event.player_index, gui.type)
+end
+
+---@param event EventData.on_gui_click
+---@param gui framework.gui
+function Gui.onEditDescription(event, gui)
+    local player = Player.get(event.player_index)
+    if not player then return end
+
+    local fc_entity = This.fico:entity(gui.entity_id)
+    if not (fc_entity and fc_entity.main and fc_entity.main.valid) then return end
+
+    if event.element.toggled then
+        -- Ignore the on_gui_closed event emitted when player.opened moves to the editor.
+        Framework.gui_manager:createCustominput(player.index, {
+            input_name = const.custom_input_ignore_close,
+            tick = game.tick,
+            element = player.opened,
+        })
+
+        This.desc_gui.openGui(player, fc_entity.main, event.element)
+    else
+        This.desc_gui.closeGui(player.index)
+    end
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -593,6 +681,21 @@ local function update_gui(gui, connection_state, fc_entity)
 end
 
 ---@param gui framework.gui
+---@param description string
+local function update_description(gui, description)
+    local has_description = description ~= ''
+
+    local add_description = gui:findElement('add-description')
+    add_description.visible = not has_description
+
+    local description_view = gui:findElement('description-view')
+    description_view.visible = has_description
+
+    local description_text = gui:findElement('description-text')
+    description_text.caption = description
+end
+
+---@param gui framework.gui
 ---@param fc_entity FilterCombinatorData
 ---@return table<defines.wire_connector_id, boolean> connection_state
 local function refresh_gui(gui, fc_entity)
@@ -668,11 +771,19 @@ function Gui.guiUpdater(gui)
     -- always update wire state and preview
     local connection_state = refresh_gui(gui, fc_entity)
 
+    local description = fc_entity.main.combinator_description
+
     local refresh_config = not (context.last_config and table.compare(context.last_config, fc_entity.config))
     local refresh_state = not (context.last_connection_state and table.compare(context.last_connection_state, connection_state))
+    local refresh_description = context.last_description ~= description
 
     if refresh_config or refresh_state then
         update_gui(gui, connection_state, fc_entity)
+    end
+
+    if refresh_description then
+        update_description(gui, description)
+        context.last_description = description
     end
 
     if refresh_config then
@@ -715,9 +826,11 @@ function Gui.onGuiOpened(event)
     ---@class filter_combinator.GuiContext
     ---@field last_config FilterCombinatorConfig?
     ---@field last_connection_state table<defines.wire_connector_id, boolean>?
+    ---@field last_description string?
     local gui_context = {
         last_config = nil,
         last_connection_state = nil,
+        last_description = nil,
     }
 
     local gui = Framework.gui_manager:createGui {

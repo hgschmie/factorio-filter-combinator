@@ -74,7 +74,7 @@ return {
         local data_util = require('framework.prototypes.data-util')
 
         local fc_entity_packed = data_util.copy_entity_prototype(data.raw['arithmetic-combinator'][const.filter_combinator_name],
-            const.filter_combinator_name_packed, true) --[[@as data.ArithmeticCombinatorPrototype ]]
+            const.filter_combinator_name_packed, true) --[[@as ArithmeticCombinatorPrototype ]]
 
         -- ArithmeticCombinatorPrototype
         for _, field in pairs(const.ac_sprites) do

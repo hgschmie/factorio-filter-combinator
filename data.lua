@@ -16,14 +16,14 @@ require('prototypes.custom-input')
 
 ------------------------------------------------------------------------
 
----@type data.ItemPrototype
+---@type ItemPrototype
 local item = util.copy(data.raw.item['arithmetic-combinator'])
 item.name = const.filter_combinator_name
 item.place_result = const.filter_combinator_name
 item.icon = const:png('filter-combinator-improved')
 item.order = 'c[combinators]-b[filter-combinator-improved]'
 
----@type data.RecipePrototype
+---@type RecipePrototype
 local recipe = util.copy(data.raw.recipe['arithmetic-combinator'])
 recipe.name = const.filter_combinator_name
 recipe.results[1].name = const.filter_combinator_name

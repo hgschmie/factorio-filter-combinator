@@ -12,7 +12,7 @@ local function update_sprite(sprite, filename, x, y)
     sprite.y = y or 0
 end
 
-local fc = util.copy(data.raw['arithmetic-combinator']['arithmetic-combinator']) --[[@as data.ArithmeticCombinatorPrototype ]]
+local fc = util.copy(data.raw['arithmetic-combinator']['arithmetic-combinator']) --[[@as ArithmeticCombinatorPrototype ]]
 
 local sprite_h = util.copy(fc.and_symbol_sprites.north)
 update_sprite(sprite_h, 'hr-filter-combinator-improved-display')

@@ -4,36 +4,22 @@
 -- can be loaded into scripts and data
 ------------------------------------------------------------------------
 
-local Constants = {}
+local Constants = {
+    prefix = 'hps__fc-',
+    log_prefix = 'FiCo',
+    name = 'filter-combinator',
+    root = '__filter-combinator-improved__',
+    order = 'c[combinators]-cf[filter-combinator-improved]',
+    config_tag_name = 'fc_config'
+}
+
+Constants.name_packed = Constants.name .. '-packed' -- for compakt circuits
+Constants.gfx_location = Constants.root .. '/graphics/'
 
 --------------------------------------------------------------------------------
 -- main constants
 --------------------------------------------------------------------------------
 
-Constants.prefix = 'hps__fc-'
-Constants.name = 'filter-combinator'
-Constants.name_packed = Constants.name .. '-packed' -- for compakt circuits
-Constants.root = '__filter-combinator-improved__'
-Constants.gfx_location = Constants.root .. '/graphics/'
-Constants.config_tag_name = 'fc_config'
-
---------------------------------------------------------------------------------
--- Framework intializer
---------------------------------------------------------------------------------
-
----@return FrameworkConfig config
-function Constants.framework_init()
-    return {
-        -- prefix is the internal mod prefix
-        prefix = Constants.prefix,
-        -- name is a human readable name
-        name = Constants.name,
-        -- The filesystem root.
-        root = Constants.root,
-        -- Exported remote interface name
-        exported_api_name = Constants.filter_combinator_name,
-    }
-end
 
 --------------------------------------------------------------------------------
 -- Path and name helpers

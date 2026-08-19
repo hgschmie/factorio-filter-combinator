@@ -42,18 +42,16 @@ Most code stands on the shoulders of other code and this is no exception.
 
 ## License/copyrights
 
-Full code base:
-
-Copyright (C) 2024-2026 Henning Schmiedehausen, licensed under the [MS-RL](https://opensource.org/licenses/MS-RL) license.
-
-The contents of the framework and the stdlib folder:
-
-Copyright (C) 2024-2026 Henning Schmiedehausen, licensed under the MIT license or the MS-RL license.
-
---------------------------------------------------
-
-Potions of this code are:
+Potions of this code is derived from code that is licensed as follows:
 
 - Copyright 2023 [Sil3ntStorm](https://github.com/Sil3ntStorm) and licensed under the [MS-RL](https://opensource.org/licenses/MS-RL)
 - Copyright (c) 2020 raiguard and licensed under the MIT License
 - Copyright (c) 2016, Afforess and licensed under the MIT License
+
+The contents of the framework and the stdlib folder:
+Copyright (C) 2024-2026 Henning Schmiedehausen, licensed under the MIT license or the MS-RL license.
+
+The code was partially written and reviewed by AI coding agents. If you are fundamentally opposed to using AI tools to develop software and improve software quality, you are free to not install it.
+
+--------------------------------------------------
+Copyright (C) 2024-2026 Henning Schmiedehausen, licensed under the [MS-RL](https://opensource.org/licenses/MS-RL) license.

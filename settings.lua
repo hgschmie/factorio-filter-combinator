@@ -5,11 +5,12 @@ local const = require('lib.constants')
 data:extend({
     {
         -- Debug mode (framework dependency)
-        setting_type = "startup",
+        type = 'string-setting',
         name = Framework.PREFIX .. 'debug-mode',
-        type = "bool-setting",
-        default_value = false,
-        order = "z"
+        order = 'az',
+        setting_type = 'startup',
+        default_value = '0',
+        allowed_values = { '0', '1', '2', '3' },
     },
 })
 

@@ -2,6 +2,8 @@
 --- Initialize this mod's globals
 ----------------------------------------------------------------------------------------------------
 
+local const = require('lib.constants')
+
 ---@class FilterCombinatorMod
 ---@field other_mods table<string, string>
 ---@field remote_apis table<string, string>
@@ -30,6 +32,26 @@ if script then
         -- use set_config(entity_id, config) to set config
         Framework.ExportedApis.set_config = This.fico.setConfig
     end
+end
+
+--------------------------------------------------------------------------------
+-- Framework intializer
+--------------------------------------------------------------------------------
+
+---@return FrameworkConfig config
+function This.framework_init()
+    return {
+        -- prefix is the internal mod prefix
+        prefix = const.prefix,
+        -- prefix for log messages
+        log_prefix = const.log_prefix,
+        -- name is a human readable name
+        name = const.name,
+        -- The filesystem root.
+        root = const.root,
+        -- Exported remote interface name
+        exported_api_name = const.filter_combinator_name,
+    }
 end
 
 function This:init()

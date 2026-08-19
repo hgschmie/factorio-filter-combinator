@@ -108,7 +108,7 @@ function FrameworkDataUtil.copy_other_prototype(prototype, new_name)
         error('Invalid prototype: prototypes must have name and type properties.')
     end
 
-    local p = util.copy(prototype) --[[@as ItemPrototype ]]
+    local p = util.copy(prototype) --[[ @as ItemPrototype ]]
     p.name = new_name
     if p.place_result then p.place_result = new_name end
     ---@diagnostic disable: inject-field, undefined-field

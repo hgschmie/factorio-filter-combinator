@@ -104,7 +104,8 @@ function FiCo:setEntity(entity_id, fc_entity)
 
     if fc_storage.count < 0 then
         fc_storage.count = table_size(fc_storage.fc)
-        Framework.logger:logf('Filter Combinator count got negative (bug), size is now: %d', fc_storage.count)
+        Framework.logger.log(0, 'setEntity', 'Filter Combinator count got negative (bug), size is now: %d',
+            function() return fc_storage.count end)
     end
 end
 

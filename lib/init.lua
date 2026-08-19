@@ -9,8 +9,9 @@ local this = require('lib.this')
 local framework = require('framework.init')
 framework:init(this.framework_init)
 
--- mod code
-local this = require('lib.this')
+if script then
+    this.boot()
+end
 
 return function()
     return this, framework

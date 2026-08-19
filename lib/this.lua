@@ -21,7 +21,7 @@ local This = {
     },
 }
 
-if script then
+function This.boot()
     This.fico = require('scripts.filter-combinator')
     This.gui = require('scripts.gui') --[[@as FilterCombinatorGui ]]
     This.desc_gui = require('scripts.desc-gui') --[[@as FilterCombinatorDescGui ]]

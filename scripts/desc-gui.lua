@@ -25,6 +25,7 @@ local function get_gui_event_definition()
     return {
         events = {
             onWindowClosed = Gui.onWindowClosed,
+            onReturnToMain = Gui.onReturnToMain,
             onConfirmDescription = Gui.onConfirmDescription,
             onDescriptionChanged = Gui.onDescriptionChanged,
         },
@@ -36,7 +37,7 @@ local function get_gui_event_definition()
         custominput_events = {
             [defines.events.on_gui_closed] = {
                 [const.custom_input_confirm_gui] = Gui.onConfirmDescription,
-                [const.custom_input_toggle_menu] = Gui.onWindowClosed,
+                [const.custom_input_toggle_menu] = Gui.onReturnToMain,
             },
         },
     }
@@ -84,7 +85,7 @@ function Gui.getUi(gui)
                         clicked_sprite = 'utility/close_black',
                         mouse_button_filter = { 'left' },
                         tooltip = { 'gui.cancel-instruction' },
-                        handler = { [defines.events.on_gui_click] = gui_events.onWindowClosed },
+                        handler = { [defines.events.on_gui_click] = gui_events.onReturnToMain },
                     },
                 },
             }, -- Title Bar End
@@ -142,9 +143,15 @@ end
 -- UI callbacks
 ----------------------------------------------------------------------------------------------------
 
----@param event EventData.on_gui_click|EventData.on_gui_closed|framework.gui.custominput_data
+---@param event EventData.on_gui_closed
 ---@param gui framework.gui
 function Gui.onWindowClosed(event, gui)
+    Framework.gui_manager:destroyGuiByPlayer(event.player_index)
+end
+
+---@param event EventData.on_gui_click|framework.gui.custominput_data
+---@param gui framework.gui
+function Gui.onReturnToMain(event, gui)
     Framework.gui_manager:destroyGui(event.player_index, gui.type)
 
     local main_gui = Framework.gui_manager:findGui(event.player_index, This.gui.NAME)
@@ -167,7 +174,7 @@ function Gui.onConfirmDescription(event, gui)
         entity.combinator_description = context.description
     end
 
-    Gui.onWindowClosed(event, gui)
+    Gui.onReturnToMain(event, gui)
 end
 
 ---@param event EventData.on_gui_text_changed

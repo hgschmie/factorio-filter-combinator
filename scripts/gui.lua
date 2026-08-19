@@ -463,12 +463,12 @@ end
 ----------------------------------------------------------------------------------------------------
 
 --- close the UI (button or shortcut key)
----@param event EventData.on_gui_click|EventData.on_gui_closed
+---@param event EventData.on_gui_click|EventData.on_gui_closed|framework.gui.custominput_data
 ---@param gui framework.gui
 function Gui.onWindowClosed(event, gui)
     local fc_entity = This.fico:entity(gui.entity_id)
     if fc_entity then This.fico:reconfigure(fc_entity) end
-    Framework.gui_manager:destroyGui(event.player_index, gui.type)
+    Framework.gui_manager:destroyGuiByPlayer(event.player_index)
 end
 
 ---@param event EventData.on_gui_click

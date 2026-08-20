@@ -1,7 +1,5 @@
 # Filter Combinator (reimagined)
 
-This is a re-imagined version of the [Filter combinator by Sil3ntStorm](https://mods.factorio.com/mod/silent-filter-combinator)
-
 The mod provides a combinator that allows filtering of values.
 
 It supports
@@ -26,7 +24,7 @@ This mod started out as a collection of patches/changes to the original filter-c
 
 This turned into a testbed to play around with ways to structure larger mods (my first attempts were pretty unstructured and suffered from spaghetti code syndrome). This led to the design of 'framework' (the contents of the framework folder) which itself was heavily inspired by flib and stdlib.
 
-## Acknowledgements/Credits
+## Credits
 
 Most code stands on the shoulders of other code and this is no exception.
 
@@ -40,7 +38,7 @@ Most code stands on the shoulders of other code and this is no exception.
 
 - [Nexela's stdlib](https://mods.factorio.com/mod/stdlib) was a big inspiration for the event driven design.
 
-## License/copyrights
+## Legal & Copyright
 
 Potions of this code is derived from code that is licensed as follows:
 
@@ -48,10 +46,7 @@ Potions of this code is derived from code that is licensed as follows:
 - Copyright (c) 2020 raiguard and licensed under the MIT License
 - Copyright (c) 2016, Afforess and licensed under the MIT License
 
-The contents of the framework and the stdlib folder:
-Copyright (C) 2024-2026 Henning Schmiedehausen, licensed under the MIT license or the MS-RL license.
-
 The code was partially written and reviewed by AI coding agents. If you are fundamentally opposed to using AI tools to develop software and improve software quality, you are free to not install it.
 
 --------------------------------------------------
-Copyright (C) 2024-2026 Henning Schmiedehausen, licensed under the [MS-RL](https://opensource.org/licenses/MS-RL) license.
+Copyright (C) 2025-2026 Henning Schmiedehausen (@hgschmie), licensed under the [MS-RL](https://opensource.org/licenses/MS-RL) license
